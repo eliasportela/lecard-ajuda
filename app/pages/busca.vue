@@ -1,0 +1,2 @@
+<template><article class="article"><h1>Busca</h1><p>Resultados para “{{ route.query.q }}”</p><p v-for="item in data" :key="item.id"><NuxtLink :to="`/${item.spaceSlug}/${item.slug}`"><strong>{{ item.title }}</strong><br>{{ item.summary }}</NuxtLink></p></article></template>
+<script setup lang="ts">const route = useRoute(); const { data } = await useFetch('/api/public/search', { query: { q: route.query.q } })</script>

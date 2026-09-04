@@ -1,0 +1,36 @@
+{
+  "name": "lecard-ajuda",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "preview": "nuxt preview",
+    "start": "node .output/server/index.mjs",
+    "typecheck": "nuxt typecheck",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "node --env-file=.env database/seed.mjs"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1127.0",
+    "@aws-sdk/s3-request-presigner": "3.1127.0",
+    "bcryptjs": "3.0.3",
+    "drizzle-orm": "0.45.2",
+    "marked": "18.0.11",
+    "mysql2": "3.24.3",
+    "nuxt": "4.5.2",
+    "sanitize-html": "2.17.7",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "@types/sanitize-html": "^2.16.0",
+    "drizzle-kit": "0.31.10",
+    "typescript": "^5.9.0",
+    "vue-tsc": "^3.2.0"
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}
