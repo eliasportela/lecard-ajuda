@@ -1,0 +1,1 @@
+ALTER TABLE `spaces` ADD `position` int DEFAULT 0 NOT NULL;

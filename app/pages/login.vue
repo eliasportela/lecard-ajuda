@@ -13,6 +13,8 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: 'auth' })
+const currentUser = useState<CurrentUser | null>('current-user', () => null)
+const currentUserInitialized = useState('current-user-initialized', () => false)
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
@@ -20,8 +22,9 @@ const message = ref('')
 async function submit() {
   loading.value = true; message.value = ''
   try {
-    await $fetch('/api/auth/login', { method: 'POST', body: { email: email.value, password: password.value } })
-    clearNuxtState('current-user')
+    const result = await $fetch<{ user: CurrentUser }>('/api/auth/login', { method: 'POST', body: { email: email.value, password: password.value } })
+    currentUser.value = result.user
+    currentUserInitialized.value = true
     await navigateTo('/admin')
   } catch { message.value = 'E-mail ou senha inválidos.' }
   finally { loading.value = false }

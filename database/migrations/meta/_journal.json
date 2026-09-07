@@ -8,6 +8,20 @@
       "when": 1788552691828,
       "tag": "0000_clear_scourge",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1788798593460,
+      "tag": "0001_youthful_starfox",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1788799903386,
+      "tag": "0002_flaky_shotgun",
+      "breakpoints": true
     }
   ]
 }

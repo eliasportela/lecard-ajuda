@@ -25,6 +25,7 @@ export const spaces = mysqlTable('spaces', {
   slug: varchar('slug', { length: 140 }).notNull(),
   description: text('description'),
   visibility: mysqlEnum('visibility', ['PUBLIC', 'PRIVATE']).notNull().default('PUBLIC'),
+  position: int('position').notNull().default(0),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow().onUpdateNow()
 }, table => [uniqueIndex('spaces_slug_unique').on(table.slug)])
@@ -35,6 +36,7 @@ export const sections = mysqlTable('sections', {
   parentId: bigint('parent_id', { mode: 'number', unsigned: true }),
   title: varchar('title', { length: 160 }).notNull(),
   slug: varchar('slug', { length: 180 }).notNull(),
+  icon: varchar('icon', { length: 40 }).notNull().default('Folder'),
   position: int('position').notNull().default(0),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow().onUpdateNow()

@@ -1,0 +1,1 @@
+ALTER TABLE `sections` ADD `icon` varchar(40) DEFAULT 'Folder' NOT NULL;

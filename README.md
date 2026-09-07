@@ -16,3 +16,5 @@ Base de conhecimento full-stack em Nuxt, com SSR, MySQL, Markdown e uploads no D
 O arquivo `.do/app.yaml` documenta a configuração do App Platform. Antes de usar, substitua o repositório e associe os segredos do MySQL e do Spaces.
 
 O filesystem do App Platform é efêmero. Todos os uploads devem usar o endpoint de URL assinada do Spaces.
+
+As imagens do editor são recebidas pela API da aplicação e enviadas ao Spaces pelo servidor, sem exigir configuração CORS no bucket. O MySQL armazena somente os metadados na tabela `attachments` e a URL no Markdown.

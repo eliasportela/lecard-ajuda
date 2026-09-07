@@ -1,17 +1,14 @@
-<template>
-  <section><h1>Novo artigo</h1><form class="admin-panel" @submit.prevent="save">
-    <label class="field">Título<input v-model="form.title" required></label>
-    <label class="field">Slug<input v-model="form.slug" required pattern="[a-z0-9-]+"></label>
-    <label class="field">Resumo<input v-model="form.summary"></label>
-    <label class="field">Seção<select v-model.number="form.sectionId" required><option v-for="s in meta?.sections" :key="s.id" :value="s.id">{{ s.title }}</option></select></label>
-    <label class="field">Markdown<textarea v-model="form.markdown" rows="18" required></textarea></label>
-    <label class="field">Status<select v-model="form.status"><option value="DRAFT">Rascunho</option><option value="PUBLISHED">Publicado</option></select></label>
-    <button class="btn">Salvar</button>
-  </form></section>
-</template>
+<template><AdminArticleEditor v-model="form" :categories="meta?.sections || []" :saving="saving" :save-version="saveVersion" @save="save" @title-input="syncSlug" @attachment-uploaded="trackAttachment" /></template>
 <script setup lang="ts">
+import type { ArticleEditorModel } from '~/components/AdminArticleEditor.vue'
 definePageMeta({ layout: 'admin', middleware: 'admin' })
 const { data: meta } = await useFetch('/api/articles/meta')
-const form = reactive({ title: '', slug: '', summary: '', sectionId: 0, markdown: '# Novo artigo\n', status: 'DRAFT' })
-async function save() { const result = await $fetch<{ id: number }>('/api/articles', { method: 'POST', body: form }); await navigateTo(`/admin/artigos/${result.id}`) }
+const form = reactive<ArticleEditorModel>({ title: '', slug: '', summary: '', sectionId: 0, markdown: '', status: 'DRAFT' })
+const attachmentIds = ref<number[]>([])
+const saving = ref(false)
+const saveVersion = ref(0)
+function slugify(value: string) { return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') }
+function syncSlug() { form.slug = slugify(form.title) }
+function trackAttachment(id: number) { attachmentIds.value.push(id) }
+async function save() { saving.value = true; try { const result = await $fetch<{ id: number }>('/api/articles', { method: 'POST', body: { ...form, attachmentIds: attachmentIds.value } }); saveVersion.value++; await navigateTo(`/admin/artigos/${result.id}`) } finally { saving.value = false } }
 </script>
