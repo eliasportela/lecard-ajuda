@@ -26,7 +26,7 @@
         </div>
       </div>
     </header>
-    <main :class="{ 'public-home-background': route.path === '/' }"><slot /></main>
+    <main :class="{ 'public-home-background': hasPublicGradient }"><slot /></main>
   </div>
 </template>
 
@@ -34,6 +34,7 @@
 import { Menu, Search } from '@lucide/vue'
 const route = useRoute()
 const searchInput = ref<HTMLInputElement>()
+const hasPublicGradient = computed(() => route.path === '/' || Boolean(route.params.space && route.params.article))
 
 function search(event: KeyboardEvent) {
   const query = (event.target as HTMLInputElement).value.trim()

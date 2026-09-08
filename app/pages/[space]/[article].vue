@@ -21,7 +21,7 @@
       <p v-if="data?.article.summary" class="article-summary">{{ data.article.summary }}</p>
       <div ref="content" class="article-content" v-html="data?.article.html" @click="handleContentClick" @keydown="handleContentKeydown" />
     </article>
-    <aside class="toc"><span class="toc__title"><List class="public-icon" /> NESTA PÁGINA</span><a v-for="heading in headings" :key="heading.id" :class="`toc__link--h${heading.level}`" :href="`#${heading.id}`">{{ heading.label }}</a></aside>
+    <aside class="toc"><span class="toc__title"><List class="public-icon" /> NESTA PÁGINA</span><a v-for="heading in headings" :key="heading.id" :class="[`toc__link--h${heading.level}`, { 'is-active': activeHeading === heading.id }]" :href="`#${heading.id}`" :aria-current="activeHeading === heading.id ? 'location' : undefined">{{ heading.label }}</a></aside>
   </div>
   <Teleport to="body">
     <Transition name="image-lightbox">
@@ -43,8 +43,10 @@ const content = ref<HTMLElement>()
 const actionsElement = ref<HTMLElement>()
 const lightboxClose = ref<HTMLButtonElement>()
 const headings = ref<Array<{ id: string; label: string; level: number }>>([])
+const activeHeading = ref('')
 const lightboxImage = ref<{ src: string; alt: string } | null>(null)
 let lightboxTrigger: HTMLImageElement | null = null
+let scrollFrame: number | null = null
 const menuOpen = ref(false)
 const actionsOpen = ref(false)
 const copied = ref(false)
@@ -197,12 +199,35 @@ function refreshHeadings() {
     node.id = id
     return { id, label, level: Number(node.tagName.slice(1)) }
   })
+  updateActiveHeading()
+}
+
+function updateActiveHeading() {
+  const nodes = [...(content.value?.querySelectorAll('h1, h2, h3, h4, h5, h6') ?? [])] as HTMLHeadingElement[]
+  if (!nodes.length) {
+    activeHeading.value = ''
+    return
+  }
+
+  const activationLine = 140
+  const current = nodes.reduce<HTMLHeadingElement>((active, node) => node.getBoundingClientRect().top <= activationLine ? node : active, nodes[0]!)
+  activeHeading.value = current.id
+}
+
+function handleArticleScroll() {
+  if (scrollFrame !== null) return
+  scrollFrame = window.requestAnimationFrame(() => {
+    updateActiveHeading()
+    scrollFrame = null
+  })
 }
 
 onMounted(async () => {
   window.addEventListener('public-menu-open', openMenu)
   document.addEventListener('click', closeActions)
   window.addEventListener('keydown', handleLightboxKeydown)
+  window.addEventListener('scroll', handleArticleScroll, { passive: true })
+  window.addEventListener('resize', handleArticleScroll)
   await nextTick()
   refreshHeadings()
   enhanceArticleImages()
@@ -215,7 +240,10 @@ watch(() => data.value?.article.html, async () => {
 onBeforeUnmount(() => {
   window.removeEventListener('public-menu-open', openMenu)
   window.removeEventListener('keydown', handleLightboxKeydown)
+  window.removeEventListener('scroll', handleArticleScroll)
+  window.removeEventListener('resize', handleArticleScroll)
   document.removeEventListener('click', closeActions)
+  if (scrollFrame !== null) window.cancelAnimationFrame(scrollFrame)
   document.body.classList.remove('has-image-lightbox')
 })
 useSeoMeta({ description: () => data.value?.article.summary ?? '' })
