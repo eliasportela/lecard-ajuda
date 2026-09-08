@@ -10,7 +10,7 @@
     "typecheck": "nuxt typecheck",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:seed": "node --env-file=.env database/seed.mjs"
+    "db:seed": "node --env-file-if-exists=.env database/seed.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1127.0",

@@ -4,5 +4,5 @@ export default defineConfig({
   dialect: 'mysql',
   schema: './server/database/schema.ts',
   out: './database/migrations',
-  dbCredentials: { url: process.env.DATABASE_URL ?? 'mysql://root:root@127.0.0.1:3306/lecard_ajuda' }
+  dbCredentials: { url: process.env.NUXT_DATABASE_URL ?? 'mysql://root:root@127.0.0.1:3306/lecard_ajuda' }
 })

@@ -8,16 +8,15 @@ export default defineNuxtConfig({
   ],
   runtimeConfig: {
     databaseUrl: '',
-    sessionSecret: '',
-    spacesEndpoint: '',
-    spacesRegion: 'us-east-1',
-    spacesBucket: '',
-    spacesPrefix: '',
+    spacesEndpoint: 'https://nyc3.digitaloceanspaces.com',
+    spacesRegion: 'nyc3',
+    spacesBucket: 'lecard-cdn',
+    spacesPrefix: 'lecard-ajuda',
     spacesKey: '',
     spacesSecret: '',
     public: {
-      siteUrl: 'http://localhost:3000',
-      spacesCdnUrl: ''
+      siteUrl: 'https://ajuda.lecard.app',
+      spacesCdnUrl: 'https://lecard-cdn.nyc3.cdn.digitaloceanspaces.com'
     }
   },
   routeRules: {

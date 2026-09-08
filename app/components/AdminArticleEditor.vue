@@ -11,7 +11,7 @@
         <div class="article-editor-setting-head"><FileText /><span><strong>Propriedades</strong><small>Configurações do artigo</small></span></div>
         <label class="editor-field">Slug<div class="editor-control"><Link2 /><input v-model="model.slug" required pattern="[a-z0-9-]+" placeholder="slug-do-artigo"></div></label>
         <label class="editor-field">Status<div class="editor-control"><span class="editor-status-dot" :class="`is-${model.status.toLowerCase()}`"></span><select v-model="model.status"><option value="DRAFT">Rascunho</option><option value="PUBLISHED">Publicado</option><option v-if="allowArchived" value="ARCHIVED">Arquivado</option></select></div></label>
-        <label class="editor-field">Categoria<div class="editor-control"><Folder /><select v-model.number="model.sectionId" required><option disabled :value="0">Selecione uma categoria</option><option v-for="category in categories" :key="category.id" :value="category.id">{{ category.title }}</option></select></div></label>
+        <label class="editor-field">Categoria<div class="editor-control"><Folder /><select ref="categoryElement" v-model.number="model.sectionId" required @change="validateCategory"><option disabled :value="0">Selecione uma categoria</option><option v-for="category in categories" :key="category.id" :value="category.id">{{ category.title }}</option></select></div></label>
       </div>
       <div v-else class="article-editor-settings article-blocks-panel">
         <div class="article-editor-setting-head"><Blocks /><span><strong>Blocos de conteúdo</strong><small>Insira no ponto atual do artigo</small></span></div>
@@ -87,6 +87,7 @@ const formElement = ref<HTMLFormElement>()
 const markdownEditor = ref<{ insertBlock: (content: string) => void; insertImage: (file: File) => Promise<void>; insertYoutube: (url: string) => boolean }>()
 const titleElement = ref<HTMLTextAreaElement>()
 const summaryElement = ref<HTMLTextAreaElement>()
+const categoryElement = ref<HTMLSelectElement>()
 const imageInput = ref<HTMLInputElement>()
 const youtubeInput = ref<HTMLInputElement>()
 const imageUrl = ref('')
@@ -116,6 +117,9 @@ function resizeSummary() {
   if (!summaryElement.value) return
   summaryElement.value.style.height = 'auto'
   summaryElement.value.style.height = `${summaryElement.value.scrollHeight}px`
+}
+function validateCategory() {
+  categoryElement.value?.setCustomValidity(model.value.sectionId > 0 ? '' : 'Selecione uma categoria.')
 }
 onMounted(() => {
   savedSnapshot.value = currentSnapshot.value
@@ -182,7 +186,11 @@ function insertYoutube() {
   if (!youtubeUrl.value || !markdownEditor.value?.insertYoutube(youtubeUrl.value)) { mediaError.value = 'Informe uma URL válida do YouTube.'; return }
   closeMediaModal()
 }
-function submit() { if (!formElement.value?.reportValidity()) return; emit('save', model.value.status) }
+function submit() {
+  validateCategory()
+  if (!formElement.value?.reportValidity()) return
+  emit('save', model.value.status)
+}
 onMounted(() => window.addEventListener('keydown', handleMediaModalKeydown))
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleMediaModalKeydown)

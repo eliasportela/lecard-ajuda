@@ -4,7 +4,7 @@ services:
   - name: web
     environment_slug: node-js
     github:
-      repo: SEU_USUARIO/SEU_REPOSITORIO
+      repo: eliasportela/lecard-ajuda
       branch: main
       deploy_on_push: true
     build_command: npm run build
@@ -24,33 +24,22 @@ services:
       - key: NUXT_DATABASE_URL
         scope: RUN_TIME
         type: SECRET
-      - key: NUXT_SESSION_SECRET
-        scope: RUN_TIME
-        type: SECRET
-      - key: NUXT_SPACES_ENDPOINT
-        scope: RUN_TIME
-      - key: NUXT_SPACES_REGION
-        scope: RUN_TIME
-      - key: NUXT_SPACES_BUCKET
-        scope: RUN_TIME
       - key: NUXT_SPACES_KEY
         scope: RUN_TIME
         type: SECRET
       - key: NUXT_SPACES_SECRET
         scope: RUN_TIME
         type: SECRET
-      - key: NUXT_PUBLIC_SPACES_CDN_URL
-        scope: RUN_AND_BUILD_TIME
 jobs:
   - name: migrate
     kind: PRE_DEPLOY
     environment_slug: node-js
     github:
-      repo: SEU_USUARIO/SEU_REPOSITORIO
+      repo: eliasportela/lecard-ajuda
       branch: main
     build_command: npm install
     run_command: npm run db:migrate
     envs:
-      - key: DATABASE_URL
+      - key: NUXT_DATABASE_URL
         scope: RUN_TIME
         type: SECRET

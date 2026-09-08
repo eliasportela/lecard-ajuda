@@ -6,7 +6,9 @@ const inputSchema = z.object({ title: z.string().min(2).max(200), slug: z.string
 export default defineEventHandler(async event => {
   await requireUser(event)
   const id = Number(getRouterParam(event, 'id'))
-  const input = inputSchema.parse(await readBody(event))
+  const parsedInput = inputSchema.safeParse(await readBody(event))
+  if (!parsedInput.success) throw createError({ statusCode: 400, statusMessage: 'Invalid article data' })
+  const input = parsedInput.data
   const [section] = await useDb().select().from(sections).where(eq(sections.id, input.sectionId)).limit(1)
   if (!section) throw createError({ statusCode: 422, statusMessage: 'Invalid section' })
   await useDb().update(articles).set({ ...input, spaceId: section.spaceId, summary: input.summary || null, publishedAt: input.status === 'PUBLISHED' ? new Date() : null }).where(eq(articles.id, id))

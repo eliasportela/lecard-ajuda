@@ -1,13 +1,13 @@
 import { hash } from 'bcryptjs'
 import mysql from 'mysql2/promise'
 
-const url = process.env.DATABASE_URL
+const url = process.env.NUXT_DATABASE_URL
 const email = process.env.ADMIN_EMAIL
 const password = process.env.ADMIN_PASSWORD
 const name = process.env.ADMIN_NAME ?? 'Administrador'
 
 if (!url || !email || !password || password.length < 12) {
-  throw new Error('Configure DATABASE_URL, ADMIN_EMAIL and ADMIN_PASSWORD (minimum 12 characters)')
+  throw new Error('Configure NUXT_DATABASE_URL, ADMIN_EMAIL and ADMIN_PASSWORD (minimum 12 characters)')
 }
 
 const connection = await mysql.createConnection(url)
