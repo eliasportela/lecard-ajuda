@@ -4,11 +4,13 @@
     <article class="article article--home">
       <div class="hero">
         <span class="eyebrow"><span>✦</span> Base de conhecimento LeCard</span>
-        <h1>Olá! Como podemos <em>ajudar</em>?</h1>
-        <p>Dicas e respostas do nosso time para ajudar você a aproveitar tudo da plataforma.</p>
-        <form class="hero-search" @submit.prevent="submitSearch">
-          <Search class="public-icon" /><input v-model="query" type="search" placeholder="O que você está procurando?" aria-label="Pesquisar artigos"><button type="submit">Buscar</button>
-        </form>
+        <div class="hero__content">
+          <h1>Olá! Como podemos <em>ajudar</em>?</h1>
+          <p>Dicas e respostas do nosso time para ajudar você a aproveitar tudo da plataforma.</p>
+          <form class="hero-search" @submit.prevent="submitSearch">
+            <Search class="public-icon" /><input v-model="query" type="search" placeholder="O que você está procurando?" aria-label="Pesquisar artigos"><button type="submit">Buscar</button>
+          </form>
+        </div>
       </div>
       <section class="home-section">
         <div class="section-heading"><div><span>ÚLTIMOS ARTIGOS</span><h2>Encontre respostas e soluções</h2></div></div>
