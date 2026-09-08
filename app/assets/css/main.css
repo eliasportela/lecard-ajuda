@@ -74,6 +74,17 @@ button, input, textarea, select { font: inherit; }
 .article pre { padding: 18px; overflow: auto; border-radius: 10px; color: #e6edf3; background: #161b22; }
 .article code { font-family: "SFMono-Regular", Consolas, monospace; }
 .article img { max-width: 100%; border-radius: 10px; }
+.article-content img { display: block; margin-right: auto; margin-left: auto; cursor: zoom-in; }
+.article-content img:focus-visible { outline: 3px solid var(--brand); outline-offset: 4px; }
+.has-image-lightbox { overflow: hidden; }
+.image-lightbox { position: fixed; z-index: 1400; inset: 0; display: grid; place-items: center; padding: 32px; background: rgba(12,10,13,.9); backdrop-filter: blur(6px); }
+.image-lightbox__dialog { position: relative; display: grid; max-width: 100%; max-height: 100%; place-items: center; }
+.image-lightbox__dialog img { display: block; max-width: min(94vw,1600px); max-height: calc(100vh - 110px); border-radius: 10px; object-fit: contain; box-shadow: 0 24px 80px rgba(0,0,0,.45); touch-action: pinch-zoom; }
+.image-lightbox__dialog p { max-width: min(720px,90vw); margin: 14px 0 0; color: rgba(255,255,255,.86); font-size: 13px; line-height: 1.5; text-align: center; }
+.image-lightbox__close { position: absolute; z-index: 1; top: -18px; right: -18px; display: grid; width: 42px; height: 42px; place-items: center; border: 1px solid rgba(255,255,255,.22); border-radius: 50%; color: #fff; background: rgba(25,22,26,.86); cursor: pointer; box-shadow: 0 6px 24px rgba(0,0,0,.3); }
+.image-lightbox__close:hover,.image-lightbox__close:focus-visible { background: var(--brand-dark); outline: none; }
+.image-lightbox__close svg { width: 21px; height: 21px; }
+.image-lightbox-enter-active,.image-lightbox-leave-active { transition: opacity .18s ease; }.image-lightbox-enter-active .image-lightbox__dialog,.image-lightbox-leave-active .image-lightbox__dialog { transition: transform .18s ease; }.image-lightbox-enter-from,.image-lightbox-leave-to { opacity: 0; }.image-lightbox-enter-from .image-lightbox__dialog,.image-lightbox-leave-to .image-lightbox__dialog { transform: scale(.96); }
 .youtube-embed, .youtube-block { position: relative; width: 100%; aspect-ratio: 16 / 9; margin: 24px 0; overflow: hidden; border-radius: 10px; background: #111; }
 .youtube-embed iframe, .youtube-block iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .article table { width: 100%; border-collapse: collapse; }
@@ -374,6 +385,9 @@ button, input, textarea, select { font: inherit; }
   .sidebar-mobile-links__socials { display: flex; grid-column: 1 / -1; align-items: center; justify-content: center; gap: 20px; padding-top: 3px; }
   .sidebar-mobile-links .sidebar-mobile-links__social { display: grid; width: 28px; height: 28px; place-items: center; padding: 0; color: var(--brand); background: transparent; }.sidebar-mobile-links .sidebar-mobile-links__social:hover { color: var(--brand-dark); background: transparent; }.sidebar-mobile-links__social svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }.sidebar-mobile-links__social .social-icon-dot,.sidebar-mobile-links__social .social-icon-play { fill: currentColor; stroke: none; }
   .article, .article--home { padding: 38px 22px 72px; }
+  .image-lightbox { padding: 16px; }
+  .image-lightbox__dialog img { max-width: calc(100vw - 32px); max-height: calc(100dvh - 90px); border-radius: 7px; }
+  .image-lightbox__close { position: fixed; top: 14px; right: 14px; width: 44px; height: 44px; }
   .article-topline { align-items: center; }.article-actions__menu { width: min(330px,calc(100vw - 44px)); }
   .hero { margin: -38px -22px 0; padding: 52px 22px 48px; }.hero__content { width: 100%; }.hero h1 { font-size: 42px; }.hero__content > p { font-size: 15px; }.hero-search { height: 54px; }.hero-search button { padding: 0 15px; }
   .home-section { padding-top: 28px; }.section-heading { display: block; }.section-heading p { margin-top: 9px; }.category-grid,.article-grid { grid-template-columns: 1fr; }

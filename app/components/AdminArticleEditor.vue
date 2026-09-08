@@ -42,7 +42,7 @@
       <div class="article-editor-document">
         <textarea ref="titleElement" v-model="model.title" class="article-editor-title" required maxlength="200" rows="1" placeholder="Título do artigo" @input="handleTitleInput" @keydown.enter.prevent></textarea>
         <textarea ref="summaryElement" v-model="model.summary" class="article-editor-subtitle" maxlength="1000" rows="1" placeholder="Adicione um resumo do artigo" @input="resizeSummary"></textarea>
-        <MarkdownEditor ref="markdownEditor" v-model="model.markdown" :article-id="articleId" @attachment-uploaded="$emit('attachment-uploaded', $event)" @request-youtube="openMediaModal('video')" />
+        <MarkdownEditor ref="markdownEditor" v-model="model.markdown" :article-id="articleId" @attachment-uploaded="$emit('attachment-uploaded', $event)" @request-image="openMediaModal('image')" @request-youtube="openMediaModal('video')" />
       </div>
     </main>
   </form>

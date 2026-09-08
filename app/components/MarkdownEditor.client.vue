@@ -13,7 +13,7 @@ import { Crepe } from '@milkdown/crepe'
 import { commandsCtx } from '@milkdown/kit/core'
 import { clearTextInCurrentBlockCommand } from '@milkdown/kit/preset/commonmark'
 import { insert, replaceAll } from '@milkdown/kit/utils'
-import { Video } from '@lucide/vue'
+import { Image as ImageIcon, Video } from '@lucide/vue'
 import { createApp } from 'vue'
 import { youtubeDirective, youtubeSchema } from '../editor/youtube'
 import { getYouTubeVideoId } from '../../shared/utils/youtube'
@@ -26,6 +26,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:modelValue': [value: string]
   'attachment-uploaded': [id: number]
+  'request-image': []
   'request-youtube': []
 }>()
 
@@ -72,11 +73,16 @@ onMounted(async () => {
   }
 
   try {
-    const iconHost = document.createElement('span')
-    const iconApp = createApp(Video, { size: 24, 'aria-hidden': true })
-    iconApp.mount(iconHost)
-    const youtubeIcon = iconHost.innerHTML
-    iconApp.unmount()
+    const renderIcon = (component: typeof Video) => {
+      const iconHost = document.createElement('span')
+      const iconApp = createApp(component, { size: 24, 'aria-hidden': true })
+      iconApp.mount(iconHost)
+      const markup = iconHost.innerHTML
+      iconApp.unmount()
+      return markup
+    }
+    const imageIcon = renderIcon(ImageIcon)
+    const youtubeIcon = renderIcon(Video)
     editor = new Crepe({
       root,
       defaultValue: props.modelValue,
@@ -93,8 +99,20 @@ onMounted(async () => {
         text: 'Comece a escrever o artigo...'
       },
       [Crepe.Feature.BlockEdit]: {
+        advancedGroup: {
+          image: null
+        },
         buildMenu: builder => {
-          builder.addGroup('media', 'Mídia').addItem('youtube', {
+          const mediaGroup = builder.addGroup('media', 'Mídia')
+          mediaGroup.addItem('image', {
+            label: 'Imagem',
+            icon: imageIcon,
+            onRun: ctx => {
+              ctx.get(commandsCtx).call(clearTextInCurrentBlockCommand.key)
+              emit('request-image')
+            }
+          })
+          mediaGroup.addItem('youtube', {
             label: 'Video do YouTube',
             icon: youtubeIcon,
             onRun: ctx => {

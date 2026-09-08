@@ -19,18 +19,32 @@
       </div>
       <h1>{{ data?.article.title }}</h1>
       <p v-if="data?.article.summary" class="article-summary">{{ data.article.summary }}</p>
-      <div ref="content" class="article-content" v-html="data?.article.html" />
+      <div ref="content" class="article-content" v-html="data?.article.html" @click="handleContentClick" @keydown="handleContentKeydown" />
     </article>
     <aside class="toc"><span class="toc__title"><List class="public-icon" /> NESTA PÁGINA</span><a v-for="heading in headings" :key="heading.id" :class="`toc__link--h${heading.level}`" :href="`#${heading.id}`">{{ heading.label }}</a></aside>
   </div>
+  <Teleport to="body">
+    <Transition name="image-lightbox">
+      <div v-if="lightboxImage" class="image-lightbox" role="presentation" @click.self="closeLightbox">
+        <section class="image-lightbox__dialog" role="dialog" aria-modal="true" :aria-label="lightboxImage.alt ? `Imagem ampliada: ${lightboxImage.alt}` : 'Imagem ampliada'">
+          <button ref="lightboxClose" class="image-lightbox__close" type="button" aria-label="Fechar imagem ampliada" @click="closeLightbox"><X /></button>
+          <img :src="lightboxImage.src" :alt="lightboxImage.alt">
+          <p v-if="lightboxImage.alt">{{ lightboxImage.alt }}</p>
+        </section>
+      </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
-import { ChevronDown, ChevronRight, Copy, Download, ExternalLink, FileText, List, MessageCircle } from '@lucide/vue'
+import { ChevronDown, ChevronRight, Copy, Download, ExternalLink, FileText, List, MessageCircle, X } from '@lucide/vue'
 const route = useRoute()
 const content = ref<HTMLElement>()
 const actionsElement = ref<HTMLElement>()
+const lightboxClose = ref<HTMLButtonElement>()
 const headings = ref<Array<{ id: string; label: string; level: number }>>([])
+const lightboxImage = ref<{ src: string; alt: string } | null>(null)
+let lightboxTrigger: HTMLImageElement | null = null
 const menuOpen = ref(false)
 const actionsOpen = ref(false)
 const copied = ref(false)
@@ -82,6 +96,56 @@ function closeActions(event: MouseEvent) {
   if (!actionsElement.value?.contains(event.target as Node)) actionsOpen.value = false
 }
 
+function imageFromTarget(target: EventTarget | null) {
+  return target instanceof HTMLImageElement && content.value?.contains(target) ? target : null
+}
+
+async function openLightbox(image: HTMLImageElement) {
+  lightboxTrigger = image
+  lightboxImage.value = { src: image.currentSrc || image.src, alt: image.alt.trim() }
+  document.body.classList.add('has-image-lightbox')
+  await nextTick()
+  lightboxClose.value?.focus()
+}
+
+function closeLightbox() {
+  lightboxImage.value = null
+  document.body.classList.remove('has-image-lightbox')
+  lightboxTrigger?.focus()
+  lightboxTrigger = null
+}
+
+function handleContentClick(event: MouseEvent) {
+  const image = imageFromTarget(event.target)
+  if (!image) return
+  event.preventDefault()
+  openLightbox(image)
+}
+
+function handleContentKeydown(event: KeyboardEvent) {
+  if (!['Enter', ' '].includes(event.key)) return
+  const image = imageFromTarget(event.target)
+  if (!image) return
+  event.preventDefault()
+  openLightbox(image)
+}
+
+function handleLightboxKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape' && lightboxImage.value) closeLightbox()
+  if (event.key === 'Tab' && lightboxImage.value) {
+    event.preventDefault()
+    lightboxClose.value?.focus()
+  }
+}
+
+function enhanceArticleImages() {
+  content.value?.querySelectorAll('img').forEach(image => {
+    image.tabIndex = 0
+    image.setAttribute('role', 'button')
+    image.setAttribute('aria-label', image.alt.trim() ? `Ampliar imagem: ${image.alt.trim()}` : 'Ampliar imagem')
+  })
+}
+
 function refreshHeadings() {
   const nodes = [...(content.value?.querySelectorAll('h1, h2, h3, h4, h5, h6') ?? [])] as HTMLHeadingElement[]
   const usedIds = new Set<string>()
@@ -101,16 +165,21 @@ function refreshHeadings() {
 onMounted(async () => {
   window.addEventListener('public-menu-open', openMenu)
   document.addEventListener('click', closeActions)
+  window.addEventListener('keydown', handleLightboxKeydown)
   await nextTick()
   refreshHeadings()
+  enhanceArticleImages()
 })
 watch(() => data.value?.article.html, async () => {
   await nextTick()
   refreshHeadings()
+  enhanceArticleImages()
 })
 onBeforeUnmount(() => {
   window.removeEventListener('public-menu-open', openMenu)
+  window.removeEventListener('keydown', handleLightboxKeydown)
   document.removeEventListener('click', closeActions)
+  document.body.classList.remove('has-image-lightbox')
 })
 useSeoMeta({ description: () => data.value?.article.summary ?? '' })
 </script>
