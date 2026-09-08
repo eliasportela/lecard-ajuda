@@ -53,8 +53,45 @@ if (error.value) throw createError({ statusCode: error.value.statusCode ?? 404, 
 const currentSection = computed(() => data.value?.navigation.find(space => space.slug === route.params.space)?.sections.find(section => section.articles.some(item => item.slug === route.params.article))?.title ?? 'Artigo')
 function openMenu() { menuOpen.value = true }
 
+function readableUrl(value: string) {
+  if (!value) return ''
+  try {
+    const url = new URL(value, window.location.href)
+    const youtubeId = url.pathname.match(/^\/embed\/([A-Za-z0-9_-]{11})$/)?.[1]
+    if (youtubeId && ['youtube.com', 'www.youtube.com', 'www.youtube-nocookie.com'].includes(url.hostname)) {
+      return `https://www.youtube.com/watch?v=${youtubeId}`
+    }
+    return url.toString()
+  } catch {
+    return value
+  }
+}
+
+function articleContentText() {
+  if (!content.value) return ''
+
+  const clone = content.value.cloneNode(true) as HTMLElement
+  clone.querySelectorAll('img').forEach(image => {
+    const url = readableUrl(image.getAttribute('src') || '')
+    image.replaceWith(document.createTextNode(url ? `\nImagem: ${url}\n` : ''))
+  })
+  clone.querySelectorAll('iframe').forEach(frame => {
+    const url = readableUrl(frame.getAttribute('src') || '')
+    frame.replaceWith(document.createTextNode(url ? `\nVídeo: ${url}\n` : ''))
+  })
+
+  clone.setAttribute('aria-hidden', 'true')
+  Object.assign(clone.style, { position: 'fixed', left: '-100000px', top: '0', width: `${content.value.clientWidth}px`, pointerEvents: 'none' })
+  document.body.appendChild(clone)
+  try {
+    return clone.innerText
+  } finally {
+    clone.remove()
+  }
+}
+
 function articleText() {
-  return [data.value?.article.title, data.value?.article.summary, content.value?.innerText]
+  return [data.value?.article.title, data.value?.article.summary, articleContentText()]
     .filter(Boolean)
     .join('\n\n')
     .replace(/\n{3,}/g, '\n\n')
