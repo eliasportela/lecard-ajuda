@@ -8,5 +8,6 @@ export default defineEventHandler(async event => {
   await requireUser(event)
   const { ids } = schema.parse(await readBody(event))
   await useDb().delete(articles).where(inArray(articles.id, [...new Set(ids)]))
+  await invalidatePublicContentCache()
   return { ok: true }
 })

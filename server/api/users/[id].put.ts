@@ -1,7 +1,7 @@
 import { hash } from 'bcryptjs'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
-import { users } from '../../database/schema'
+import { sessions, users } from '../../database/schema'
 
 const schema = z.object({
   name: z.string().min(2).max(120),
@@ -25,6 +25,9 @@ export default defineEventHandler(async event => {
   if (!targetUser) throw createError({ statusCode: 404, statusMessage: 'User not found' })
 
   const passwordHash = input.password ? await hash(input.password, 12) : undefined
-  await useDb().update(users).set({ name: input.name, email: input.email.toLowerCase(), role: input.role, active: input.active, ...(passwordHash ? { passwordHash } : {}) }).where(eq(users.id, id))
+  await useDb().transaction(async tx => {
+    await tx.update(users).set({ name: input.name, email: input.email.toLowerCase(), role: input.role, active: input.active, ...(passwordHash ? { passwordHash } : {}) }).where(eq(users.id, id))
+    if (passwordHash) await tx.delete(sessions).where(eq(sessions.userId, id))
+  })
   return { ok: true }
 })

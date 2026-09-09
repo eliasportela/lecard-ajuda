@@ -14,6 +14,7 @@ export default defineNuxtConfig({
     spacesPrefix: 'lecard-ajuda',
     spacesKey: '',
     spacesSecret: '',
+    brevoApiKey: '',
     public: {
       siteUrl: 'https://ajuda.lecard.app',
       spacesCdnUrl: 'https://lecard-cdn.nyc3.cdn.digitaloceanspaces.com'
@@ -22,6 +23,23 @@ export default defineNuxtConfig({
   routeRules: {
     '/admin/**': { ssr: true, cache: false },
     '/login': { ssr: true, cache: false },
+    '/esqueci-senha': { ssr: true, cache: false },
+    '/redefinir-senha': { ssr: true, cache: false },
+    '/api/auth/**': {
+      cors: false,
+      cache: false,
+      headers: {
+        'cache-control': 'no-store, max-age=0',
+        pragma: 'no-cache',
+        expires: '0'
+      }
+    },
+    '/api/public/navigation': {
+      cache: { maxAge: 300, swr: true, staleMaxAge: 3600, group: 'lecard/public', name: 'navigation' }
+    },
+    '/api/public/articles/**': {
+      cache: { maxAge: 300, swr: true, staleMaxAge: 3600, group: 'lecard/public', name: 'articles' }
+    },
     '/api/**': { cors: false, cache: false }
   },
   nitro: {

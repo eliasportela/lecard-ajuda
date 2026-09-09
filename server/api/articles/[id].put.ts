@@ -12,5 +12,6 @@ export default defineEventHandler(async event => {
   const [section] = await useDb().select().from(sections).where(eq(sections.id, input.sectionId)).limit(1)
   if (!section) throw createError({ statusCode: 422, statusMessage: 'Invalid section' })
   await useDb().update(articles).set({ ...input, spaceId: section.spaceId, summary: input.summary || null, publishedAt: input.status === 'PUBLISHED' ? new Date() : null }).where(eq(articles.id, id))
+  await invalidatePublicContentCache()
   return { ok: true }
 })

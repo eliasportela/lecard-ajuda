@@ -14,5 +14,6 @@ export default defineEventHandler(async event => {
   const input = schema.parse(await readBody(event))
   const [lastSpace] = await useDb().select({ position: spaces.position }).from(spaces).orderBy(desc(spaces.position)).limit(1)
   const result = await useDb().insert(spaces).values({ ...input, description: input.description || null, position: (lastSpace?.position ?? -1) + 1 })
+  await invalidatePublicContentCache()
   return { id: result[0].insertId }
 })

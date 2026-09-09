@@ -10,5 +10,6 @@ export default defineEventHandler(async event => {
   const [linked] = await useDb().select({ total: count(articles.id) }).from(articles).where(eq(articles.sectionId, id))
   if ((linked?.total ?? 0) > 0) throw createError({ statusCode: 409, statusMessage: 'Category has linked articles' })
   await useDb().delete(sections).where(eq(sections.id, id))
+  await invalidatePublicContentCache()
   return { ok: true }
 })

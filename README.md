@@ -18,3 +18,9 @@ O arquivo `.do/app.yaml` documenta a configuração do App Platform. Antes de us
 O filesystem do App Platform é efêmero. Todos os uploads devem usar o endpoint de URL assinada do Spaces.
 
 As imagens do editor são recebidas pela API da aplicação e enviadas ao Spaces pelo servidor, sem exigir configuração CORS no bucket. O MySQL armazena somente os metadados na tabela `attachments` e a URL no Markdown.
+
+O login possui rate limiting em memória por IP e por combinação de IP/e-mail. Esse estado é local ao processo e é reiniciado a cada deploy; antes de executar mais de uma instância da aplicação, substitua o armazenamento do limitador por um serviço compartilhado, como Redis.
+
+## Recuperação de senha
+
+Configure `NUXT_BREVO_API_KEY`. Os e-mails são enviados por `LeCard <noreply@lecard.app>`, que precisa estar autorizado no Brevo. Execute `npm run db:migrate` para criar a tabela de tokens de recuperação.

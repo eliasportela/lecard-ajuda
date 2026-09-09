@@ -8,5 +8,6 @@ export default defineEventHandler(async event => {
   const [space] = await useDb().select({ id: spaces.id }).from(spaces).where(eq(spaces.id, id)).limit(1)
   if (!space) throw createError({ statusCode: 404, statusMessage: 'Space not found' })
   await useDb().delete(spaces).where(eq(spaces.id, id))
+  await invalidatePublicContentCache()
   return { ok: true }
 })

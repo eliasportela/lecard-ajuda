@@ -11,5 +11,6 @@ export default defineEventHandler(async event => {
   await useDb().transaction(async tx => {
     for (const [position, id] of ids.entries()) await tx.update(sections).set({ position }).where(and(eq(sections.id, id), eq(sections.spaceId, spaceId)))
   })
+  await invalidatePublicContentCache()
   return { ok: true }
 })

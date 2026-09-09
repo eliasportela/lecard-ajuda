@@ -19,6 +19,13 @@ export const sessions = mysqlTable('sessions', {
   createdAt: timestamp('created_at').notNull().defaultNow()
 })
 
+export const passwordResetTokens = mysqlTable('password_reset_tokens', {
+  id: varchar('id', { length: 64 }).primaryKey(),
+  userId: bigint('user_id', { mode: 'number', unsigned: true }).notNull().references(() => users.id, { onDelete: 'cascade' }),
+  expiresAt: timestamp('expires_at').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow()
+})
+
 export const spaces = mysqlTable('spaces', {
   id: bigint('id', { mode: 'number', unsigned: true }).autoincrement().primaryKey(),
   name: varchar('name', { length: 120 }).notNull(),

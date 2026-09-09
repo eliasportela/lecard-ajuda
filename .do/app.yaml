@@ -30,6 +30,9 @@ services:
       - key: NUXT_SPACES_SECRET
         scope: RUN_TIME
         type: SECRET
+      - key: NUXT_BREVO_API_KEY
+        scope: RUN_TIME
+        type: SECRET
 jobs:
   - name: migrate
     kind: PRE_DEPLOY
