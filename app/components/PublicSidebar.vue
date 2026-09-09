@@ -6,25 +6,20 @@
     </div>
     <nav class="sidebar__navigation" aria-label="Artigos da base de conhecimento">
       <NuxtLink class="nav-home" to="/" @click="$emit('close')"><House class="public-icon" /> Início</NuxtLink>
-      <section v-for="space in spaces" :key="space.id" class="nav-space">
-        <button class="nav-space__trigger" :class="{ 'is-active': currentSpace === space.slug }" type="button" :aria-expanded="expandedSpace === space.id" @click="toggleSpace(space.id)">
-          <span>{{ space.name }}</span><ChevronRight class="nav-chevron public-icon" />
-        </button>
-        <div v-if="expandedSpace === space.id" class="nav-categories">
-          <div v-for="category in space.sections" :key="category.id" class="nav-category">
-            <NuxtLink v-if="category.articles.length === 1" class="nav-category__trigger" :class="{ 'is-active': isActiveArticle(space.slug, category.articles[0]!.slug) }" :to="`/${space.slug}/${category.articles[0]!.slug}`" @click="$emit('close')">
-              <span class="nav-category__icon"><CategoryIcon :name="category.icon" /></span><span>{{ category.title }}</span><ChevronRight class="nav-chevron public-icon" />
-            </NuxtLink>
-            <button v-else class="nav-category__trigger" type="button" :aria-expanded="expandedCategory === category.id" :disabled="!category.articles.length" @click="toggleCategory(category.id)">
-              <span class="nav-category__icon"><CategoryIcon :name="category.icon" /></span><span>{{ category.title }}</span><ChevronRight v-if="category.articles.length" class="nav-chevron public-icon" />
-            </button>
-            <div v-if="category.articles.length > 1 && expandedCategory === category.id" class="nav-articles">
-              <div class="nav-heading nav-heading--articles">Artigos</div>
-              <NuxtLink v-for="article in category.articles" :key="article.id" class="nav-article" :to="`/${space.slug}/${article.slug}`" @click="$emit('close')">{{ article.title }}</NuxtLink>
-            </div>
+      <section class="nav-categories nav-categories--root">
+        <div v-for="category in categories" :key="category.id" class="nav-category">
+          <NuxtLink v-if="category.articles.length === 1" class="nav-category__trigger" :class="{ 'is-active': isActiveArticle(category.spaceSlug, category.articles[0]!.slug) }" :to="`/${category.spaceSlug}/${category.articles[0]!.slug}`" @click="$emit('close')">
+            <span class="nav-category__icon"><CategoryIcon :name="category.icon" /></span><span>{{ category.title }}</span><ChevronRight class="nav-chevron public-icon" />
+          </NuxtLink>
+          <button v-else class="nav-category__trigger" type="button" :aria-expanded="expandedCategory === category.id" :disabled="!category.articles.length" @click="toggleCategory(category.id)">
+            <span class="nav-category__icon"><CategoryIcon :name="category.icon" /></span><span>{{ category.title }}</span><ChevronRight v-if="category.articles.length" class="nav-chevron public-icon" />
+          </button>
+          <div v-if="category.articles.length > 1 && expandedCategory === category.id" class="nav-articles">
+            <div class="nav-heading nav-heading--articles">Artigos</div>
+            <NuxtLink v-for="article in category.articles" :key="article.id" class="nav-article" :to="`/${category.spaceSlug}/${article.slug}`" @click="$emit('close')">{{ article.title }}</NuxtLink>
           </div>
-          <p v-if="!space.sections.length" class="nav-empty">Nenhuma categoria publicada.</p>
         </div>
+        <p v-if="!categories.length" class="nav-empty">Nenhuma categoria publicada.</p>
       </section>
     </nav>
     <nav class="sidebar-mobile-links" aria-label="Links da LeCard">
@@ -57,25 +52,20 @@ interface NavigationSpace { id: number; name: string; slug: string; sections: Na
 const props = defineProps<{ spaces: NavigationSpace[]; currentSpace?: string; currentArticle?: string; open?: boolean }>()
 defineEmits<{ close: [] }>()
 
-const activePath = computed(() => {
+const categories = computed(() => props.spaces.flatMap(space => space.sections.map(category => ({ ...category, spaceSlug: space.slug }))))
+const activeCategoryId = computed(() => {
   for (const space of props.spaces) {
     for (const category of space.sections) {
-      if (space.slug === props.currentSpace && category.articles.some(article => article.slug === props.currentArticle)) return { spaceId: space.id, categoryId: category.id }
+      if (space.slug === props.currentSpace && category.articles.some(article => article.slug === props.currentArticle)) return category.id
     }
   }
 })
-const expandedSpace = ref<number>()
 const expandedCategory = ref<number>()
 
-watch([() => props.spaces, activePath], () => {
-  expandedSpace.value = activePath.value?.spaceId ?? props.spaces.find(space => space.slug === props.currentSpace)?.id ?? props.spaces[0]?.id
-  expandedCategory.value = activePath.value?.categoryId
+watch([() => props.spaces, activeCategoryId], () => {
+  expandedCategory.value = activeCategoryId.value
 }, { immediate: true })
 
-function toggleSpace(id: number) {
-  expandedSpace.value = expandedSpace.value === id ? undefined : id
-  expandedCategory.value = undefined
-}
 function toggleCategory(id: number) { expandedCategory.value = expandedCategory.value === id ? undefined : id }
 function isActiveArticle(space: string, article: string) { return space === props.currentSpace && article === props.currentArticle }
 </script>

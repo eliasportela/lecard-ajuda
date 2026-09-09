@@ -4,7 +4,7 @@
     <p style="color:var(--muted)">Acesse a administração da base de conhecimento.</p>
     <form @submit.prevent="submit">
       <label class="field">E-mail<input v-model="email" type="email" required autocomplete="email"></label>
-      <label class="field">Senha<input v-model="password" type="password" required autocomplete="current-password"></label>
+      <label class="field">Senha<span class="password-field"><input v-model="password" :type="showPassword ? 'text' : 'password'" required autocomplete="current-password"><button type="button" :aria-label="showPassword ? 'Ocultar senha' : 'Mostrar senha'" :aria-pressed="showPassword" @click="showPassword = !showPassword"><EyeOff v-if="showPassword" /><Eye v-else /></button></span></label>
       <p v-if="message" class="error">{{ message }}</p>
       <button class="btn" :disabled="loading">{{ loading ? 'Entrando...' : 'Entrar' }}</button>
     </form>
@@ -12,11 +12,14 @@
 </template>
 
 <script setup lang="ts">
+import { Eye, EyeOff } from '@lucide/vue'
+
 definePageMeta({ layout: 'auth' })
 const currentUser = useState<CurrentUser | null>('current-user', () => null)
 const currentUserInitialized = useState('current-user-initialized', () => false)
 const email = ref('')
 const password = ref('')
+const showPassword = ref(false)
 const loading = ref(false)
 const message = ref('')
 async function submit() {
