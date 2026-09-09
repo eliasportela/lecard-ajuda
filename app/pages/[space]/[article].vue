@@ -13,6 +13,7 @@
             <button type="button" role="menuitem" @click="copyArticle"><Copy /><span><strong>Copiar</strong><small>Copiar todo o conteúdo do artigo</small></span></button>
             <button type="button" role="menuitem" @click="viewPlainText"><FileText /><span><strong>Ver Texto Simples</strong><small>Abrir o artigo sem formatação</small></span></button>
             <button type="button" role="menuitem" @click="exportTxt"><Download /><span><strong>Exportar como TXT</strong><small>Baixar o artigo em texto simples</small></span></button>
+            <button type="button" role="menuitem" @click="exportDocx"><FileDown /><span><strong>Exportar como Word</strong><small>Baixar o artigo em formato .docx</small></span></button>
             <button type="button" role="menuitem" @click="openInChatGPT"><MessageCircle /><span><strong>Abrir no ChatGPT <ExternalLink /></strong><small>Perguntar ao ChatGPT sobre o artigo</small></span></button>
           </div>
         </div>
@@ -37,7 +38,8 @@
 </template>
 
 <script setup lang="ts">
-import { ChevronDown, ChevronRight, Copy, Download, ExternalLink, FileText, List, MessageCircle, X } from '@lucide/vue'
+import { ChevronDown, ChevronRight, Copy, Download, ExternalLink, FileDown, FileText, List, MessageCircle, X } from '@lucide/vue'
+import { exportArticleDocx } from '~/utils/exportArticleDocx.client'
 const route = useRoute()
 const content = ref<HTMLElement>()
 const actionsElement = ref<HTMLElement>()
@@ -128,6 +130,12 @@ function exportTxt() {
   link.download = `${String(route.params.article)}.txt`
   link.click()
   URL.revokeObjectURL(url)
+  actionsOpen.value = false
+}
+
+async function exportDocx() {
+  if (!content.value || !data.value?.article.title) return
+  await exportArticleDocx(data.value.article.title, data.value.article.summary, content.value, String(route.params.article))
   actionsOpen.value = false
 }
 
