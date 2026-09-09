@@ -34,7 +34,7 @@
 import { Menu, Search } from '@lucide/vue'
 const route = useRoute()
 const searchInput = ref<HTMLInputElement>()
-const hasPublicGradient = computed(() => route.path === '/' || Boolean(route.params.space && route.params.article))
+const hasPublicGradient = computed(() => route.path === '/' || Boolean(route.params.space))
 
 function search(event: KeyboardEvent) {
   const query = (event.target as HTMLInputElement).value.trim()

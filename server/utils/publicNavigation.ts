@@ -12,6 +12,7 @@ export interface PublicNavigationArticle {
 export interface PublicNavigationSection {
   id: number
   title: string
+  slug: string
   icon: string
   articles: PublicNavigationArticle[]
 }
@@ -32,6 +33,7 @@ export async function getPublicNavigation(): Promise<PublicNavigationSpace[]> {
     spaceDescription: spaces.description,
     sectionId: sections.id,
     sectionTitle: sections.title,
+    sectionSlug: sections.slug,
     sectionIcon: sections.icon,
     articleId: articles.id,
     articleTitle: articles.title,
@@ -61,7 +63,7 @@ export async function getPublicNavigation(): Promise<PublicNavigationSpace[]> {
     if (!row.sectionId) continue
     let section = navigationSections.get(row.sectionId)
     if (!section) {
-      section = { id: row.sectionId, title: row.sectionTitle!, icon: row.sectionIcon!, articles: [] }
+      section = { id: row.sectionId, title: row.sectionTitle!, slug: row.sectionSlug!, icon: row.sectionIcon!, articles: [] }
       navigationSections.set(row.sectionId, section)
       space.sections.push(section)
     }

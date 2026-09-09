@@ -46,7 +46,7 @@
 import { ChevronRight, ExternalLink, House, X } from '@lucide/vue'
 
 interface NavigationArticle { id: number; title: string; slug: string; summary?: string | null; publishedAt?: string | Date | null }
-interface NavigationCategory { id: number; title: string; icon: string; articles: NavigationArticle[] }
+interface NavigationCategory { id: number; title: string; slug: string; icon: string; articles: NavigationArticle[] }
 interface NavigationSpace { id: number; name: string; slug: string; sections: NavigationCategory[] }
 
 const props = defineProps<{ spaces: NavigationSpace[]; currentSpace?: string; currentArticle?: string; open?: boolean }>()

@@ -67,7 +67,7 @@
             <button class="article-media-upload" type="button" :disabled="mediaLoading" @click="imageInput?.click()"><Upload /> {{ mediaLoading ? 'Enviando...' : 'Selecionar imagem' }}</button>
             <input ref="imageInput" class="article-block-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif" @change="insertImage">
             <span class="article-media-divider">ou</span>
-            <label>Endereço da imagem<input v-model="imageUrl" type="url" placeholder="https://exemplo.com/imagem.jpg" @keydown.enter.prevent="insertImageUrl"></label>
+            <label>Endereço da imagem<input ref="imageUrlInput" v-model="imageUrl" type="url" placeholder="https://exemplo.com/imagem.jpg" @keydown.enter.prevent="insertImageUrl"></label>
           </div>
           <div v-else class="article-media-dialog__body"><label>Link do YouTube<input ref="youtubeInput" v-model="youtubeUrl" type="url" placeholder="https://youtube.com/watch?v=..." @keydown.enter.prevent="insertYoutube"></label></div>
           <small v-if="mediaError" class="article-block-error">{{ mediaError }}</small>
@@ -89,6 +89,7 @@ const titleElement = ref<HTMLTextAreaElement>()
 const summaryElement = ref<HTMLTextAreaElement>()
 const categoryElement = ref<HTMLSelectElement>()
 const imageInput = ref<HTMLInputElement>()
+const imageUrlInput = ref<HTMLInputElement>()
 const youtubeInput = ref<HTMLInputElement>()
 const imageUrl = ref('')
 const youtubeUrl = ref('')
@@ -155,10 +156,9 @@ function insertBlock(content: string) { markdownEditor.value?.insertBlock(conten
 async function openMediaModal(type: 'image' | 'video') {
   mediaError.value = ''
   mediaModal.value = type
-  if (type === 'video') {
-    await nextTick()
-    youtubeInput.value?.focus()
-  }
+  await nextTick()
+  if (type === 'image') imageUrlInput.value?.focus()
+  else youtubeInput.value?.focus()
 }
 function closeMediaModal() { if (!mediaLoading.value) { mediaModal.value = null; mediaError.value = ''; imageUrl.value = ''; youtubeUrl.value = '' } }
 function handleMediaModalKeydown(event: KeyboardEvent) { if (event.key === 'Escape' && mediaModal.value) closeMediaModal() }
