@@ -1,4 +1,4 @@
-<template><AdminArticleEditor v-if="article" v-model="article" :categories="meta?.sections || []" :saving="saving" :article-id="Number(route.params.id)" :preview-url="previewUrl" :save-version="saveVersion" allow-archived @save="save" /></template>
+<template><AdminArticleEditor v-if="article" v-model="article" :categories="meta?.sections || []" :authors="meta?.authors || []" :can-change-author="meta?.canChangeAuthor" :saving="saving" :article-id="Number(route.params.id)" :preview-url="previewUrl" :save-version="saveVersion" allow-archived @save="save" /></template>
 <script setup lang="ts">
 import { ofetch } from 'ofetch'
 import type { ArticleEditorModel } from '~/components/AdminArticleEditor.vue'

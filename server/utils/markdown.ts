@@ -20,9 +20,16 @@ export async function renderMarkdown(source: string) {
     allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'h1', 'h2', 'iframe']),
     allowedAttributes: {
       ...sanitizeHtml.defaults.allowedAttributes,
+      a: ['href', 'name', 'target', 'rel'],
       div: ['class'],
       img: ['src', 'alt', 'title', 'loading'],
       iframe: ['src', 'title', 'loading', 'allow', 'allowfullscreen', 'referrerpolicy']
+    },
+    transformTags: {
+      a: (_tagName, attribs) => ({
+        tagName: 'a',
+        attribs: { ...attribs, target: '_blank', rel: 'noopener noreferrer' }
+      })
     },
     allowedSchemes: ['http', 'https', 'mailto'],
     allowedIframeHostnames: ['www.youtube-nocookie.com']

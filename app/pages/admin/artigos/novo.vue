@@ -1,9 +1,9 @@
-<template><AdminArticleEditor v-model="form" :categories="meta?.sections || []" :saving="saving" :save-version="saveVersion" @save="save" @title-input="syncSlug" @attachment-uploaded="trackAttachment" /></template>
+<template><AdminArticleEditor v-model="form" :categories="meta?.sections || []" :authors="meta?.authors || []" :can-change-author="meta?.canChangeAuthor" :saving="saving" :save-version="saveVersion" @save="save" @title-input="syncSlug" @attachment-uploaded="trackAttachment" /></template>
 <script setup lang="ts">
 import type { ArticleEditorModel } from '~/components/AdminArticleEditor.vue'
 definePageMeta({ layout: 'admin', middleware: 'admin' })
 const { data: meta } = await useFetch('/api/articles/meta')
-const form = reactive<ArticleEditorModel>({ title: '', slug: '', summary: '', sectionId: 0, markdown: '', status: 'DRAFT' })
+const form = reactive<ArticleEditorModel>({ title: '', slug: '', summary: '', sectionId: 0, authorId: meta.value?.currentUserId || 0, markdown: '', status: 'DRAFT' })
 const attachmentIds = ref<number[]>([])
 const saving = ref(false)
 const saveVersion = ref(0)

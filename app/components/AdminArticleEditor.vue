@@ -12,6 +12,7 @@
         <label class="editor-field">Slug<div class="editor-control"><Link2 /><input v-model="model.slug" required pattern="[a-z0-9-]+" placeholder="slug-do-artigo"></div></label>
         <label class="editor-field">Status<div class="editor-control"><span class="editor-status-dot" :class="`is-${model.status.toLowerCase()}`"></span><select v-model="model.status"><option value="DRAFT">Rascunho</option><option value="PUBLISHED">Publicado</option><option v-if="allowArchived" value="ARCHIVED">Arquivado</option></select></div></label>
         <label class="editor-field">Categoria<div class="editor-control"><Folder /><select ref="categoryElement" v-model.number="model.sectionId" required @change="validateCategory"><option disabled :value="0">Selecione uma categoria</option><option v-for="category in categories" :key="category.id" :value="category.id">{{ category.title }}</option></select></div></label>
+        <label v-if="canChangeAuthor" class="editor-field">Autor<div class="editor-control"><UserRound /><select v-model.number="model.authorId" required><option v-for="author in authors" :key="author.id" :value="author.id" :disabled="!author.active && author.id !== model.authorId">{{ author.name }}{{ author.active ? '' : ' (inativo)' }}</option></select></div></label>
       </div>
       <div v-else class="article-editor-settings article-blocks-panel">
         <div class="article-editor-setting-head"><Blocks /><span><strong>Blocos de conteúdo</strong><small>Insira no ponto atual do artigo</small></span></div>
@@ -78,10 +79,10 @@
   </Teleport>
 </template>
 <script setup lang="ts">
-import { ArrowLeft, Blocks, ChevronDown, Code2, Eye, FileText, Folder, Heading2, Image as ImageIcon, Link2, List, LoaderCircle, Minus, Pilcrow, Quote, Save, Upload, Video, X } from '@lucide/vue'
-export type ArticleEditorModel = { title: string; slug: string; summary: string | null; sectionId: number; markdown: string; status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' }
+import { ArrowLeft, Blocks, ChevronDown, Code2, Eye, FileText, Folder, Heading2, Image as ImageIcon, Link2, List, LoaderCircle, Minus, Pilcrow, Quote, Save, Upload, UserRound, Video, X } from '@lucide/vue'
+export type ArticleEditorModel = { title: string; slug: string; summary: string | null; sectionId: number; authorId: number; markdown: string; status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' }
 const model = defineModel<ArticleEditorModel>({ required: true })
-const props = defineProps<{ categories: Array<{ id: number; title: string }>; saving?: boolean; articleId?: number; allowArchived?: boolean; previewUrl?: string; saveVersion?: number }>()
+const props = defineProps<{ categories: Array<{ id: number; title: string }>; authors: Array<{ id: number; name: string; active: boolean }>; canChangeAuthor?: boolean; saving?: boolean; articleId?: number; allowArchived?: boolean; previewUrl?: string; saveVersion?: number }>()
 const emit = defineEmits<{ save: [status: ArticleEditorModel['status']]; 'attachment-uploaded': [id: number]; 'title-input': [] }>()
 const formElement = ref<HTMLFormElement>()
 const markdownEditor = ref<{ insertBlock: (content: string) => void; insertImage: (file: File) => Promise<void>; insertYoutube: (url: string) => boolean }>()
