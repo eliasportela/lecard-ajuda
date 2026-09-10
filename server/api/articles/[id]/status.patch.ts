@@ -11,5 +11,6 @@ export default defineEventHandler(async event => {
   const [article] = await useDb().select({ id: articles.id, publishedAt: articles.publishedAt }).from(articles).where(eq(articles.id, id)).limit(1)
   if (!article) throw createError({ statusCode: 404, statusMessage: 'Article not found' })
   await useDb().update(articles).set({ status: input.status, publishedAt: input.status === 'PUBLISHED' ? (article.publishedAt || new Date()) : null }).where(eq(articles.id, id))
+  await invalidatePublicContentCache()
   return { ok: true }
 })

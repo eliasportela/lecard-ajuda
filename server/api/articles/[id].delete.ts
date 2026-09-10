@@ -10,5 +10,6 @@ export default defineEventHandler(async event => {
   if (!article) throw createError({ statusCode: 404, statusMessage: 'Article not found' })
 
   await useDb().delete(articles).where(eq(articles.id, id))
+  await invalidatePublicContentCache()
   return { ok: true }
 })

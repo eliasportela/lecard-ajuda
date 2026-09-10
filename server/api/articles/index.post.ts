@@ -23,5 +23,6 @@ export default defineEventHandler(async event => {
     }
     return id
   })
+  await invalidatePublicContentCache()
   return { id: articleId }
 })

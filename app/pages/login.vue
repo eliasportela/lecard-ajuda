@@ -5,6 +5,7 @@
     <form @submit.prevent="submit">
       <label class="field">E-mail<input v-model="email" type="email" required autocomplete="email"></label>
       <label class="field">Senha<span class="password-field"><input v-model="password" :type="showPassword ? 'text' : 'password'" required autocomplete="current-password"><button type="button" :aria-label="showPassword ? 'Ocultar senha' : 'Mostrar senha'" :aria-pressed="showPassword" @click="showPassword = !showPassword"><EyeOff v-if="showPassword" /><Eye v-else /></button></span></label>
+      <p><NuxtLink to="/esqueci-senha">Esqueci minha senha</NuxtLink></p>
       <p v-if="message" class="error">{{ message }}</p>
       <button class="btn" :disabled="loading">{{ loading ? 'Entrando...' : 'Entrar' }}</button>
     </form>

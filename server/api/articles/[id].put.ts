@@ -17,5 +17,6 @@ export default defineEventHandler(async event => {
   const [author] = await useDb().select({ id: users.id, active: users.active }).from(users).where(eq(users.id, input.authorId)).limit(1)
   if (!author || (!author.active && input.authorId !== article.authorId)) throw createError({ statusCode: 422, statusMessage: 'Invalid author' })
   await useDb().update(articles).set({ ...input, spaceId: section.spaceId, summary: input.summary || null, publishedAt: input.status === 'PUBLISHED' ? new Date() : null }).where(eq(articles.id, id))
+  await invalidatePublicContentCache()
   return { ok: true }
 })
