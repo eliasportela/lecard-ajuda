@@ -15,7 +15,7 @@ import { clearTextInCurrentBlockCommand } from '@milkdown/kit/preset/commonmark'
 import { insert, replaceAll } from '@milkdown/kit/utils'
 import { Image as ImageIcon, Video } from '@lucide/vue'
 import { createApp } from 'vue'
-import { youtubeDirective, youtubeSchema } from '../editor/youtube'
+import { preserveNumericTextDirectives, youtubeDirective, youtubeSchema } from '../editor/youtube'
 import { getYouTubeVideoId } from '../../shared/utils/youtube'
 
 const props = defineProps<{
@@ -125,7 +125,7 @@ onMounted(async () => {
     }
   })
 
-    editor.editor.use(youtubeDirective).use(youtubeSchema)
+    editor.editor.use(youtubeDirective).use(preserveNumericTextDirectives).use(youtubeSchema)
 
     editor.on(listener => {
       listener.markdownUpdated((_ctx, markdown) => {

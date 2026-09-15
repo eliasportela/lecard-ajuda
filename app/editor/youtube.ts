@@ -1,8 +1,41 @@
 import { $nodeSchema, $remark } from '@milkdown/kit/utils'
+import type { Node } from '@milkdown/kit/transformer'
 import remarkDirective from 'remark-directive'
 import { getYouTubeEmbedUrl, getYouTubeVideoId } from '../../shared/utils/youtube'
 
 export const youtubeDirective = $remark('youtubeDirective', () => remarkDirective)
+
+export const preserveNumericTextDirectives = $remark(
+  'preserveNumericTextDirectives',
+  () => () => (tree: Node) => {
+    const visit = (node: Node) => {
+      const parent = node as Node & { children?: Node[] }
+      if (!Array.isArray(parent.children)) return
+
+      parent.children = parent.children.map((child: Node) => {
+        const directive = child as Node & {
+          name?: string
+          attributes?: Record<string, unknown>
+          children?: Node[]
+        }
+        const attributes = directive.attributes
+        const isPlainNumericDirective = child.type === 'textDirective'
+          && /^\d+$/.test(String(directive.name ?? ''))
+          && (!attributes || Object.keys(attributes).length === 0)
+          && (!Array.isArray(directive.children) || directive.children.length === 0)
+
+        if (isPlainNumericDirective) {
+          return { type: 'text', value: `:${directive.name}` } as Node
+        }
+
+        visit(child)
+        return child
+      })
+    }
+
+    visit(tree)
+  }
+)
 
 export const youtubeSchema = $nodeSchema('youtube', () => ({
   group: 'block',
