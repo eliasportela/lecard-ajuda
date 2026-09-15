@@ -1,3 +1,16 @@
+import { execFileSync } from 'node:child_process'
+
+function getCommitHash() {
+  const environmentCommit = process.env.COMMIT_SHA || process.env.GITHUB_SHA || process.env.VERCEL_GIT_COMMIT_SHA
+  if (environmentCommit) return environmentCommit.slice(0, 7)
+
+  try {
+    return execFileSync('git', ['rev-parse', '--short=7', 'HEAD'], { encoding: 'utf8' }).trim()
+  } catch {
+    return ''
+  }
+}
+
 export default defineNuxtConfig({
   compatibilityDate: '2026-09-01',
   devtools: { enabled: true },
@@ -16,6 +29,8 @@ export default defineNuxtConfig({
     spacesSecret: '',
     brevoApiKey: '',
     public: {
+      appVersion: process.env.npm_package_version || '1.0.0',
+      appCommit: getCommitHash(),
       siteUrl: 'https://ajuda.lecard.app',
       spacesCdnUrl: 'https://lecard-cdn.nyc3.cdn.digitaloceanspaces.com'
     }

@@ -11,6 +11,7 @@
         <button class="admin-rail__link" type="button" :data-label="menuExpanded ? 'Recolher Menu' : 'Expandir Menu'" @click="menuExpanded = !menuExpanded"><PanelLeftClose v-if="menuExpanded" class="admin-icon" /><PanelLeftOpen v-else class="admin-icon" /><span>{{ menuExpanded ? 'Recolher Menu' : 'Expandir Menu' }}</span></button>
         <div class="admin-rail__divider" aria-hidden="true"></div>
         <button class="admin-rail__link" type="button" data-label="Sair" @click="logout"><LogOut class="admin-icon" /><span>Sair</span></button>
+        <p class="admin-rail__version" :title="versionLabel">{{ versionLabel }}</p>
       </div>
     </aside>
     <main class="admin-main"><slot /></main>
@@ -22,7 +23,9 @@ import { BookOpen, LogOut, PanelLeftClose, PanelLeftOpen, UserRound, Users } fro
 import logoSquare from '~/assets/img/logo-lecard.png'
 import logoHorizontal from '~/assets/img/logo-lecard-horizontal.png'
 const { user } = await useCurrentUser()
+const config = useRuntimeConfig()
 const menuExpanded = ref(false)
+const versionLabel = computed(() => `v${config.public.appVersion}${config.public.appCommit ? ` · ${config.public.appCommit}` : ''}`)
 async function logout() {
   await $fetch('/api/auth/logout', { method: 'POST' })
   user.value = null
