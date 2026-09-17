@@ -10,5 +10,5 @@ export default defineEventHandler(async (event) => {
     .where(and(eq(spaces.slug, spaceSlug), eq(spaces.visibility, 'PUBLIC'), eq(articles.slug, articleSlug), eq(articles.status, 'PUBLISHED'))).limit(1)
   const article = rows[0]
   if (!article) throw createError({ statusCode: 404, statusMessage: 'Article not found' })
-  return { article: { ...article, html: await renderMarkdown(article.markdown), markdown: undefined }, navigation: await getPublicNavigation() }
+  return { article: { ...article, html: await renderMarkdown(article.markdown), markdown: undefined } }
 })

@@ -1,6 +1,6 @@
 <template>
   <div class="docs-grid">
-    <PublicSidebar :spaces="data?.navigation ?? []" :current-space="String(route.params.space)" :current-article="String(route.params.article)" :open="menuOpen" @close="menuOpen = false" />
+    <PublicSidebar :spaces="navigationData?.navigation ?? []" :current-space="String(route.params.space)" :current-article="String(route.params.article)" :open="menuOpen" @close="menuOpen = false" />
     <article class="article">
       <div class="article-topline">
         <nav class="breadcrumbs" aria-label="Navegação estrutural"><NuxtLink to="/">Início</NuxtLink><ChevronRight class="public-icon" /><span>{{ currentSection }}</span></nav>
@@ -18,9 +18,9 @@
           </div>
         </div>
       </div>
-      <h1>{{ data?.article.title }}</h1>
-      <p v-if="data?.article.summary" class="article-summary">{{ data.article.summary }}</p>
-      <div ref="content" class="article-content" v-html="data?.article.html" @click="handleContentClick" @keydown="handleContentKeydown" />
+      <h1>{{ articleData?.article.title }}</h1>
+      <p v-if="articleData?.article.summary" class="article-summary">{{ articleData.article.summary }}</p>
+      <div ref="content" class="article-content" v-html="articleData?.article.html" @click="handleContentClick" @keydown="handleContentKeydown" />
     </article>
     <aside class="toc"><span class="toc__title"><List class="public-icon" /> NESTA PÁGINA</span><a v-for="heading in headings" :key="heading.id" :class="[`toc__link--h${heading.level}`, { 'is-active': activeHeading === heading.id }]" :href="`#${heading.id}`" :aria-current="activeHeading === heading.id ? 'location' : undefined">{{ heading.label }}</a></aside>
   </div>
@@ -40,6 +40,11 @@
 <script setup lang="ts">
 import { ChevronDown, ChevronRight, Copy, Download, ExternalLink, FileDown, FileText, List, MessageCircle, X } from '@lucide/vue'
 import { exportArticleDocx } from '~/utils/exportArticleDocx.client'
+
+interface ArticleResponse {
+  article: { id: number; title: string; summary: string | null; html: string; spaceId: number }
+}
+
 const route = useRoute()
 const content = ref<HTMLElement>()
 const actionsElement = ref<HTMLElement>()
@@ -52,9 +57,11 @@ let scrollFrame: number | null = null
 const menuOpen = ref(false)
 const actionsOpen = ref(false)
 const copied = ref(false)
-const { data, error } = await useFetch(`/api/public/articles/${route.params.space}/${route.params.article}`)
+const articleUrl = computed(() => `/api/public/articles/${route.params.space}/${route.params.article}`)
+const { data: articleData, error } = await useFetch<ArticleResponse>(articleUrl)
+const { data: navigationData } = await useFetch('/api/public/navigation')
 if (error.value) throw createError({ statusCode: error.value.statusCode ?? 404, statusMessage: 'Artigo não encontrado' })
-const currentSection = computed(() => data.value?.navigation.find(space => space.slug === route.params.space)?.sections.find(section => section.articles.some(item => item.slug === route.params.article))?.title ?? 'Artigo')
+const currentSection = computed(() => navigationData.value?.navigation.find(space => space.slug === route.params.space)?.sections.find(section => section.articles.some(item => item.slug === route.params.article))?.title ?? 'Artigo')
 function openMenu() { menuOpen.value = true }
 
 function readableUrl(value: string) {
@@ -95,7 +102,7 @@ function articleContentText() {
 }
 
 function articleText() {
-  return [data.value?.article.title, data.value?.article.summary, articleContentText()]
+  return [articleData.value?.article.title, articleData.value?.article.summary, articleContentText()]
     .filter(Boolean)
     .join('\n\n')
     .replace(/\n{3,}/g, '\n\n')
@@ -134,8 +141,8 @@ function exportTxt() {
 }
 
 async function exportDocx() {
-  if (!content.value || !data.value?.article.title) return
-  await exportArticleDocx(data.value.article.title, data.value.article.summary, content.value, String(route.params.article))
+  if (!content.value || !articleData.value?.article.title) return
+  await exportArticleDocx(articleData.value.article.title, articleData.value.article.summary, content.value, String(route.params.article))
   actionsOpen.value = false
 }
 
@@ -240,7 +247,7 @@ onMounted(async () => {
   refreshHeadings()
   enhanceArticleImages()
 })
-watch(() => data.value?.article.html, async () => {
+watch(() => articleData.value?.article.html, async () => {
   await nextTick()
   refreshHeadings()
   enhanceArticleImages()
@@ -254,5 +261,5 @@ onBeforeUnmount(() => {
   if (scrollFrame !== null) window.cancelAnimationFrame(scrollFrame)
   document.body.classList.remove('has-image-lightbox')
 })
-useSeoMeta({ description: () => data.value?.article.summary ?? '' })
+useSeoMeta({ description: () => articleData.value?.article.summary ?? '' })
 </script>

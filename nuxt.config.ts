@@ -49,12 +49,6 @@ export default defineNuxtConfig({
         expires: '0'
       }
     },
-    '/api/public/navigation': {
-      cache: { maxAge: 300, swr: true, staleMaxAge: 3600, group: 'lecard/public', name: 'navigation' }
-    },
-    '/api/public/articles/**': {
-      cache: { maxAge: 300, swr: true, staleMaxAge: 3600, group: 'lecard/public', name: 'articles' }
-    },
     '/api/**': { cors: false, cache: false }
   },
   nitro: {
