@@ -8,13 +8,10 @@
       <NuxtLink class="nav-home" to="/" @click="$emit('close')"><House class="public-icon" /> Início</NuxtLink>
       <section class="nav-categories nav-categories--root">
         <div v-for="category in categories" :key="category.id" class="nav-category">
-          <NuxtLink v-if="category.articles.length === 1" class="nav-category__trigger" :class="{ 'is-active': isActiveArticle(category.spaceSlug, category.articles[0]!.slug) }" :to="`/${category.spaceSlug}/${category.articles[0]!.slug}`" @click="$emit('close')">
-            <span class="nav-category__icon"><CategoryIcon :name="category.icon" /></span><span>{{ category.title }}</span><ChevronRight class="nav-chevron public-icon" />
-          </NuxtLink>
-          <button v-else class="nav-category__trigger" type="button" :aria-expanded="expandedCategories.has(category.id)" :disabled="!category.articles.length" @click="toggleCategory(category.id)">
+          <button class="nav-category__trigger" type="button" :aria-expanded="expandedCategory === category.id" :disabled="!category.articles.length" @click="toggleCategory(category.id)">
             <span class="nav-category__icon"><CategoryIcon :name="category.icon" /></span><span>{{ category.title }}</span><ChevronRight v-if="category.articles.length" class="nav-chevron public-icon" />
           </button>
-          <div v-if="category.articles.length > 1 && expandedCategories.has(category.id)" class="nav-articles">
+          <div v-if="category.articles.length && expandedCategory === category.id" class="nav-articles">
             <div class="nav-heading nav-heading--articles">Artigos</div>
             <NuxtLink v-for="article in category.articles" :key="article.id" class="nav-article" :to="`/${category.spaceSlug}/${article.slug}`" @click="$emit('close')">{{ article.title }}</NuxtLink>
           </div>
@@ -60,19 +57,11 @@ const activeCategoryId = computed(() => {
     }
   }
 })
-const expandedCategories = ref(new Set<number>())
+const expandedCategory = ref<number>()
 
 watch([() => props.spaces, activeCategoryId], () => {
-  if (activeCategoryId.value !== undefined) {
-    expandedCategories.value = new Set([...expandedCategories.value, activeCategoryId.value])
-  }
+  expandedCategory.value = activeCategoryId.value
 }, { immediate: true })
 
-function toggleCategory(id: number) {
-  const next = new Set(expandedCategories.value)
-  if (next.has(id)) next.delete(id)
-  else next.add(id)
-  expandedCategories.value = next
-}
-function isActiveArticle(space: string, article: string) { return space === props.currentSpace && article === props.currentArticle }
+function toggleCategory(id: number) { expandedCategory.value = expandedCategory.value === id ? undefined : id }
 </script>
