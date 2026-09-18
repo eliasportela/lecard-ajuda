@@ -8,11 +8,10 @@
       <NuxtLink class="nav-home" to="/" @click="$emit('close')"><House class="public-icon" /> Início</NuxtLink>
       <section class="nav-categories nav-categories--root">
         <div v-for="category in categories" :key="category.id" class="nav-category">
-          <button class="nav-category__trigger" type="button" :aria-expanded="expandedCategory === category.id" :disabled="!category.articles.length" @click="toggleCategory(category.id)">
+          <button class="nav-category__trigger" :class="{ 'is-active': activeCategoryId === category.id }" type="button" :aria-expanded="expandedCategory === category.id" :disabled="!category.articles.length" @click="toggleCategory(category.id)">
             <span class="nav-category__icon"><CategoryIcon :name="category.icon" /></span><span>{{ category.title }}</span><ChevronRight v-if="category.articles.length" class="nav-chevron public-icon" />
           </button>
           <div v-if="category.articles.length && expandedCategory === category.id" class="nav-articles">
-            <div class="nav-heading nav-heading--articles">Artigos</div>
             <NuxtLink v-for="article in category.articles" :key="article.id" class="nav-article" :to="`/${category.spaceSlug}/${article.slug}`" @click="$emit('close')">{{ article.title }}</NuxtLink>
           </div>
         </div>

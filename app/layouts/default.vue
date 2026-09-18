@@ -6,7 +6,7 @@
         <img src="~/assets/img/logo-lecard-horizontal.png" alt="LeCard">
         <span class="brand__slash">/</span><span>Central de Ajuda</span>
       </NuxtLink>
-      <label class="global-search">
+      <label v-if="!isHome" class="global-search">
         <Search class="public-icon" />
         <input ref="searchInput" type="search" placeholder="Pergunte ou busque uma resposta..." aria-label="Buscar na base de conhecimento" @keyup.enter="search">
         <kbd>⌘ K</kbd>
@@ -34,7 +34,8 @@
 import { Menu, Search } from '@lucide/vue'
 const route = useRoute()
 const searchInput = ref<HTMLInputElement>()
-const hasPublicGradient = computed(() => route.path === '/' || Boolean(route.params.space))
+const isHome = computed(() => route.path === '/')
+const hasPublicGradient = computed(() => route.path === '/')
 
 function search(event: KeyboardEvent) {
   const query = (event.target as HTMLInputElement).value.trim()
