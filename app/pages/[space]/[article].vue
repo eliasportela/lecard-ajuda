@@ -217,6 +217,15 @@ function refreshHeadings() {
   updateActiveHeading()
 }
 
+function scrollToHash() {
+  if (!route.hash || !content.value) return
+  const id = decodeURIComponent(route.hash.slice(1))
+  const heading = [...content.value.querySelectorAll<HTMLElement>('[id]')].find(node => node.id === id)
+  if (!heading) return
+  heading.scrollIntoView()
+  updateActiveHeading()
+}
+
 function updateActiveHeading() {
   const nodes = [...(content.value?.querySelectorAll('h1, h2, h3, h4, h5, h6') ?? [])] as HTMLHeadingElement[]
   if (!nodes.length) {
@@ -246,11 +255,17 @@ onMounted(async () => {
   await nextTick()
   refreshHeadings()
   enhanceArticleImages()
+  window.requestAnimationFrame(scrollToHash)
 })
 watch(() => articleData.value?.article.html, async () => {
   await nextTick()
   refreshHeadings()
   enhanceArticleImages()
+  window.requestAnimationFrame(scrollToHash)
+})
+watch(() => route.hash, async () => {
+  await nextTick()
+  scrollToHash()
 })
 onBeforeUnmount(() => {
   window.removeEventListener('public-menu-open', openMenu)
