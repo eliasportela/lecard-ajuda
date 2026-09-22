@@ -154,6 +154,7 @@ button, input, textarea, select { font: inherit; }
 .breadcrumbs { display: flex; align-items: center; gap: 7px; color: #9b949d; font-size: 12px; font-weight: 600; }
 .breadcrumbs a { color: var(--brand-dark); }.breadcrumbs .public-icon { width: 12px; }
 .article-content { font-size: 16px; }
+.article-content :is(p, li) { text-align: justify; text-justify: inter-word; }
 .article-content a { color: var(--brand-dark); text-decoration: underline; text-decoration-color: #ffc2dd; text-underline-offset: 3px; }
 .article-content li > p,.markdown-editor .ProseMirror li > p { margin-block: .25em; }
 .article-content li > :is(ol,ul),.markdown-editor .ProseMirror li > :is(ol,ul) { margin-block: .35em; }
