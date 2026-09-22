@@ -26,7 +26,7 @@
         <tbody>
           <tr v-for="article in filteredArticles" :key="article.id" class="clickable-row" tabindex="0" @click="openArticle(article.id)" @keydown.enter="openArticle(article.id)">
             <td class="check-cell"><input type="checkbox" :aria-label="`Selecionar ${article.title}`" :checked="selectedIds.includes(article.id)" @click.stop @change="toggleArticle(article.id)"></td>
-            <td><NuxtLink class="article-title" :to="`/admin/artigos/${article.id}`"><span class="article-title__icon"><BookOpen class="admin-icon" /></span><span><strong>{{ article.title }}</strong><small>/{{ article.slug }}</small></span></NuxtLink></td>
+            <td><NuxtLink class="article-title" :to="`/admin/artigos/${article.id}`"><span class="article-title__icon article-title__icon--berry"><BookOpen class="admin-icon" /></span><span><strong>{{ article.title }}</strong><small>/{{ article.slug }}</small></span></NuxtLink></td>
             <td><span class="category-pill">{{ article.category }}</span></td>
             <td><span class="article-author" :title="article.authorName"><span class="avatar">{{ initials(article.authorName) }}</span><span>{{ article.authorName }}</span></span></td>
             <td><span class="status-pill" :class="`status-pill--${article.status.toLowerCase()}`"><i />{{ statusLabel[article.status] }}</span></td>
