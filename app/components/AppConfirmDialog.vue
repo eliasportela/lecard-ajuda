@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <Transition name="confirm-dialog">
-      <div v-if="open" class="confirm-dialog" role="presentation" @click.self="cancel">
+      <div v-if="open" class="confirm-dialog confirm-dialog--system" role="presentation" @click.self="cancel">
         <section class="confirm-dialog__panel" :class="`confirm-dialog__panel--${variant}`" role="alertdialog" aria-modal="true" :aria-labelledby="titleId" :aria-describedby="descriptionId">
           <div class="confirm-dialog__icon" aria-hidden="true"><TriangleAlert v-if="variant === 'warning'" /><Trash2 v-else /></div>
           <h2 :id="titleId">{{ title }}</h2>

@@ -56,31 +56,68 @@
     @cancel="leaveConfirmationOpen = false"
     @confirm="confirmLeave"
   />
+  <AppConfirmDialog
+    :open="Boolean(mediaDeleteTarget)"
+    title="Excluir imagem"
+    :description="mediaDeleteTarget ? `A imagem “${mediaDeleteTarget.originalName}” será removida permanentemente da biblioteca e do armazenamento. Esta ação não pode ser desfeita.` : ''"
+    :loading="Boolean(mediaDeletingId)"
+    :error="mediaDeleteError"
+    confirm-label="Excluir imagem"
+    @cancel="cancelDeleteMedia"
+    @confirm="confirmDeleteMedia"
+  />
   <Teleport to="body">
     <Transition name="confirm-dialog">
       <div v-if="mediaModal" class="confirm-dialog" role="presentation" @click.self="closeMediaModal">
-        <section class="confirm-dialog__panel article-media-dialog" role="dialog" aria-modal="true">
+        <section class="confirm-dialog__panel article-media-dialog" :class="{ 'article-media-dialog--library': mediaModal === 'image' && mediaView === 'library' }" role="dialog" aria-modal="true">
           <button class="article-media-dialog__close" type="button" aria-label="Fechar" @click="closeMediaModal"><X /></button>
           <div class="confirm-dialog__icon"><ImageIcon v-if="mediaModal === 'image'" /><Video v-else /></div>
-          <h2>{{ mediaModal === 'image' ? 'Inserir imagem' : 'Inserir vídeo do YouTube' }}</h2>
-          <p>{{ mediaModal === 'image' ? 'Envie um arquivo ou cole o endereço de uma imagem.' : 'Cole o link do vídeo que deseja adicionar ao artigo.' }}</p>
-          <div v-if="mediaModal === 'image'" class="article-media-dialog__body">
-            <button class="article-media-upload" type="button" :disabled="mediaLoading" @click="imageInput?.click()"><Upload /> {{ mediaLoading ? 'Enviando...' : 'Selecionar imagem' }}</button>
+          <h2>{{ mediaModal === 'image' ? (mediaView === 'library' ? 'Biblioteca de imagens' : 'Inserir imagem') : 'Inserir vídeo do YouTube' }}</h2>
+          <p>{{ mediaModal === 'image' ? (mediaView === 'library' ? 'Escolha uma imagem já enviada para inserir no artigo.' : 'Envie um arquivo, escolha na biblioteca ou cole um endereço.') : 'Cole o link do vídeo que deseja adicionar ao artigo.' }}</p>
+          <div v-if="mediaModal === 'image' && mediaView === 'insert'" class="article-media-dialog__body">
+            <button class="article-media-upload" type="button" :disabled="mediaLoading" @click="imageInput?.click()"><Upload /> {{ mediaLoading ? 'Enviando...' : 'Upload de imagem' }}</button>
             <input ref="imageInput" class="article-block-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif" @change="insertImage">
+            <button class="article-media-library-button" type="button" @click="openMediaLibrary"><Images /> Selecionar na biblioteca <ChevronRight /></button>
             <span class="article-media-divider">ou</span>
             <label>Endereço da imagem<input ref="imageUrlInput" v-model="imageUrl" type="url" placeholder="https://exemplo.com/imagem.jpg" @keydown.enter.prevent="insertImageUrl"></label>
           </div>
+          <div v-else-if="mediaModal === 'image'" class="article-media-library">
+            <button class="article-media-library__back" type="button" aria-label="Voltar para inserir imagem" @click="mediaView = 'insert'"><ArrowLeft /></button>
+            <div class="article-media-library__head"><strong>Todas as imagens</strong><small>{{ mediaItems.length }} {{ mediaItems.length === 1 ? 'imagem' : 'imagens' }}</small></div>
+            <div v-if="mediaLibraryLoading" class="article-media-library__empty">Carregando imagens...</div>
+            <div v-else-if="!mediaItems.length" class="article-media-library__empty">Nenhuma imagem enviada ainda.</div>
+            <div v-else class="article-media-library__grid">
+              <article v-for="item in mediaItems" :key="item.id" class="article-media-card">
+                <button class="article-media-card__preview" type="button" :aria-label="`Ampliar ${item.originalName}`" @click="mediaPreview = item"><img :src="item.publicUrl" :alt="item.originalName" loading="lazy"><ZoomIn /></button>
+                <div class="article-media-card__info"><strong :title="item.originalName">{{ item.originalName }}</strong><small>{{ formatBytes(item.size) }} · {{ formatMediaDate(item.createdAt) }}</small></div>
+                <div class="article-media-card__actions">
+                  <button type="button" @click="useMedia(item)">Usar</button>
+                  <button class="is-danger" type="button" :disabled="mediaDeletingId === item.id" :title="item.usedBy.length ? `Em uso em ${item.usedBy.length} artigo(s)` : 'Excluir imagem'" @click="deleteMedia(item)"><Trash2 /></button>
+                </div>
+              </article>
+            </div>
+          </div>
           <div v-else class="article-media-dialog__body"><label>Link do YouTube<input ref="youtubeInput" v-model="youtubeUrl" type="url" placeholder="https://youtube.com/watch?v=..." @keydown.enter.prevent="insertYoutube"></label></div>
           <small v-if="mediaError" class="article-block-error">{{ mediaError }}</small>
-          <div class="confirm-dialog__actions"><button class="btn btn--secondary" type="button" @click="closeMediaModal">Cancelar</button><button class="btn" type="button" :disabled="mediaLoading" @click="mediaModal === 'image' ? insertImageUrl() : insertYoutube()">Inserir</button></div>
+          <div v-if="mediaModal !== 'image' || mediaView === 'insert'" class="confirm-dialog__actions"><button class="btn btn--secondary" type="button" @click="closeMediaModal">Cancelar</button><button class="btn" type="button" :disabled="mediaLoading" @click="mediaModal === 'image' ? insertImageUrl() : insertYoutube()">Inserir</button></div>
         </section>
       </div>
     </Transition>
   </Teleport>
+  <Teleport to="body">
+    <div v-if="mediaPreview" class="article-media-preview" role="presentation" @click.self="mediaPreview = null">
+      <section role="dialog" aria-modal="true" :aria-label="`Visualização de ${mediaPreview.originalName}`">
+        <button type="button" aria-label="Fechar visualização" @click="mediaPreview = null"><X /></button>
+        <img :src="mediaPreview.publicUrl" :alt="mediaPreview.originalName">
+        <strong>{{ mediaPreview.originalName }}</strong>
+      </section>
+    </div>
+  </Teleport>
 </template>
 <script setup lang="ts">
-import { ArrowLeft, Blocks, ChevronDown, Code2, Eye, FileText, Folder, Heading2, Image as ImageIcon, Link2, List, LoaderCircle, Minus, Pilcrow, Quote, Save, Upload, UserRound, Video, X } from '@lucide/vue'
+import { ArrowLeft, Blocks, ChevronDown, ChevronRight, Code2, Eye, FileText, Folder, Heading2, Image as ImageIcon, Images, Link2, List, LoaderCircle, Minus, Pilcrow, Quote, Save, Trash2, Upload, UserRound, Video, X, ZoomIn } from '@lucide/vue'
 export type ArticleEditorModel = { title: string; slug: string; summary: string | null; sectionId: number; authorId: number; markdown: string; status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' }
+type MediaItem = { id: number; originalName: string; publicUrl: string; mimeType: string; size: number; createdAt: string; usedBy: Array<{ id: number; title: string }> }
 const model = defineModel<ArticleEditorModel>({ required: true })
 const props = defineProps<{ categories: Array<{ id: number; title: string }>; authors: Array<{ id: number; name: string; active: boolean }>; canChangeAuthor?: boolean; saving?: boolean; articleId?: number; allowArchived?: boolean; previewUrl?: string; saveVersion?: number }>()
 const emit = defineEmits<{ save: [status: ArticleEditorModel['status']]; 'attachment-uploaded': [id: number]; 'title-input': [] }>()
@@ -96,7 +133,14 @@ const imageUrl = ref('')
 const youtubeUrl = ref('')
 const mediaError = ref('')
 const mediaModal = ref<'image' | 'video' | null>(null)
+const mediaView = ref<'insert' | 'library'>('insert')
 const mediaLoading = ref(false)
+const mediaLibraryLoading = ref(false)
+const mediaDeletingId = ref<number>()
+const mediaDeleteTarget = ref<MediaItem | null>(null)
+const mediaDeleteError = ref('')
+const mediaItems = ref<MediaItem[]>([])
+const mediaPreview = ref<MediaItem | null>(null)
 const isSaving = ref(false)
 let savingStartedAt = 0
 let savingTimer: ReturnType<typeof setTimeout> | undefined
@@ -157,11 +201,12 @@ function insertBlock(content: string) { markdownEditor.value?.insertBlock(conten
 async function openMediaModal(type: 'image' | 'video') {
   mediaError.value = ''
   mediaModal.value = type
+  mediaView.value = 'insert'
   await nextTick()
   if (type === 'image') imageUrlInput.value?.focus()
   else youtubeInput.value?.focus()
 }
-function closeMediaModal() { if (!mediaLoading.value) { mediaModal.value = null; mediaError.value = ''; imageUrl.value = ''; youtubeUrl.value = '' } }
+function closeMediaModal() { if (!mediaLoading.value) { mediaModal.value = null; mediaView.value = 'insert'; mediaPreview.value = null; mediaError.value = ''; imageUrl.value = ''; youtubeUrl.value = '' } }
 function handleMediaModalKeydown(event: KeyboardEvent) { if (event.key === 'Escape' && mediaModal.value) closeMediaModal() }
 async function insertImage(event: Event) {
   const input = event.target as HTMLInputElement
@@ -173,6 +218,54 @@ async function insertImage(event: Event) {
   finally { mediaLoading.value = false }
   input.value = ''
 }
+async function loadMediaLibrary() {
+  mediaLibraryLoading.value = true
+  try { mediaItems.value = await $fetch<MediaItem[]>('/api/uploads') }
+  catch { mediaError.value = 'Não foi possível carregar a biblioteca de imagens.' }
+  finally { mediaLibraryLoading.value = false }
+}
+async function openMediaLibrary() {
+  mediaError.value = ''
+  mediaView.value = 'library'
+  await loadMediaLibrary()
+}
+function useMedia(item: MediaItem) {
+  insertBlock(`\n![${item.originalName}](${item.publicUrl})\n`)
+  closeMediaModal()
+}
+function deleteMedia(item: MediaItem) {
+  mediaError.value = ''
+  if (model.value.markdown.includes(item.publicUrl)) {
+    mediaError.value = 'Esta imagem está no conteúdo atual. Remova-a do artigo antes de excluir.'
+    return
+  }
+  if (item.usedBy.length) {
+    mediaError.value = `Esta imagem está em uso em ${item.usedBy.map(article => `“${article.title}”`).join(', ')}.`
+    return
+  }
+  mediaDeleteError.value = ''
+  mediaDeleteTarget.value = item
+}
+function cancelDeleteMedia() {
+  if (mediaDeletingId.value) return
+  mediaDeleteTarget.value = null
+  mediaDeleteError.value = ''
+}
+async function confirmDeleteMedia() {
+  const item = mediaDeleteTarget.value
+  if (!item) return
+  mediaDeletingId.value = item.id
+  try {
+    await $fetch(`/api/uploads/${item.id}`, { method: 'DELETE' })
+    mediaItems.value = mediaItems.value.filter(media => media.id !== item.id)
+    mediaDeleteTarget.value = null
+  } catch (error) {
+    const fetchError = error as { data?: { message?: string, statusMessage?: string }, message?: string }
+    mediaDeleteError.value = fetchError.data?.statusMessage || fetchError.data?.message || fetchError.message || 'Não foi possível excluir a imagem.'
+  } finally { mediaDeletingId.value = undefined }
+}
+function formatBytes(bytes: number) { return bytes < 1_000_000 ? `${Math.max(1, Math.round(bytes / 1000))} KB` : `${(bytes / 1_000_000).toFixed(1)} MB` }
+function formatMediaDate(value: string) { return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(new Date(value)) }
 function insertImageUrl() {
   mediaError.value = ''
   try {
