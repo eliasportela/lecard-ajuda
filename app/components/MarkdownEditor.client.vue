@@ -40,6 +40,10 @@ let updatingFromEditor = false
 
 async function uploadImage(file: File) {
   uploadError.value = ''
+  if (file.size > 5_000_000) {
+    uploadError.value = 'A imagem deve ter no máximo 5 MB.'
+    throw new Error(uploadError.value)
+  }
   uploading.value = true
 
   try {

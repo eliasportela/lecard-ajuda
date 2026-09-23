@@ -7,7 +7,7 @@ const schema = z.object({
   key: z.string().regex(/^(?:[a-zA-Z0-9._-]+\/)*articles\/\d{4}-\d{2}-\d{2}\/[0-9a-f-]{36}\.[a-z0-9]+$/).max(500),
   filename: z.string().min(1).max(255),
   contentType: z.enum(['image/jpeg', 'image/png', 'image/webp', 'image/gif']),
-  size: z.number().int().positive().max(10_000_000),
+  size: z.number().int().positive().max(5_000_000),
   articleId: z.number().int().positive().nullable().optional()
 })
 

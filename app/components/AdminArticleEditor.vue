@@ -213,6 +213,11 @@ async function insertImage(event: Event) {
   const file = input.files?.[0]
   if (!file || !markdownEditor.value) return
   mediaError.value = ''
+  if (file.size > 5_000_000) {
+    mediaError.value = 'A imagem deve ter no máximo 5 MB.'
+    input.value = ''
+    return
+  }
   mediaLoading.value = true
   try { await markdownEditor.value.insertImage(file); mediaLoading.value = false; closeMediaModal() } catch { mediaError.value = 'Não foi possível enviar a imagem.' }
   finally { mediaLoading.value = false }

@@ -3,7 +3,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
 
-const schema = z.object({ filename: z.string().min(1).max(255), contentType: z.enum(['image/jpeg', 'image/png', 'image/webp', 'image/gif']), size: z.number().int().positive().max(10_000_000) })
+const schema = z.object({ filename: z.string().min(1).max(255), contentType: z.enum(['image/jpeg', 'image/png', 'image/webp', 'image/gif']), size: z.number().int().positive().max(5_000_000) })
 export default defineEventHandler(async event => {
   await requireUser(event)
   const input = schema.parse(await readBody(event))

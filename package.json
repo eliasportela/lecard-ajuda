@@ -29,6 +29,7 @@
     "nuxt": "4.5.2",
     "remark-directive": "^4.0.0",
     "sanitize-html": "2.17.7",
+    "sharp": "^0.34.5",
     "zod": "4.5.4"
   },
   "devDependencies": {

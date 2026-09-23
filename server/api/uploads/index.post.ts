@@ -9,6 +9,7 @@ const allowedContentTypes = {
   'image/webp': 'webp',
   'image/gif': 'gif'
 } as const
+const maxUploadSize = 5_000_000
 
 export default defineEventHandler(async event => {
   await requireUser(event)
@@ -22,8 +23,8 @@ export default defineEventHandler(async event => {
   if (!image?.filename || !image.type || !(image.type in allowedContentTypes)) {
     throw createError({ statusCode: 422, message: 'Envie uma imagem JPG, PNG, WebP ou GIF.' })
   }
-  if (!image.data.length || image.data.length > 10_000_000) {
-    throw createError({ statusCode: 422, message: 'A imagem deve ter no máximo 10 MB.' })
+  if (!image.data.length || image.data.length > maxUploadSize) {
+    throw createError({ statusCode: 422, message: 'A imagem deve ter no máximo 5 MB.' })
   }
   if (articleId !== null && (!Number.isInteger(articleId) || articleId <= 0)) {
     throw createError({ statusCode: 422, message: 'Artigo inválido.' })
@@ -40,8 +41,14 @@ export default defineEventHandler(async event => {
   }
 
   const contentType = image.type as keyof typeof allowedContentTypes
+  let processedImage: Awaited<ReturnType<typeof processUploadedImage>>
+  try {
+    processedImage = await processUploadedImage(image.data, contentType, image.filename)
+  } catch {
+    throw createError({ statusCode: 422, message: 'Não foi possível processar a imagem. Verifique se o arquivo é válido.' })
+  }
   const prefix = config.spacesPrefix.replace(/^\/+|\/+$/g, '')
-  const objectPath = `articles/${new Date().toISOString().slice(0, 10)}/${randomUUID()}.${allowedContentTypes[contentType]}`
+  const objectPath = `articles/${new Date().toISOString().slice(0, 10)}/${randomUUID()}.${processedImage.extension}`
   const key = prefix ? `${prefix}/${objectPath}` : objectPath
   const client = new S3Client({
     endpoint: config.spacesEndpoint,
@@ -54,9 +61,9 @@ export default defineEventHandler(async event => {
     await client.send(new PutObjectCommand({
       Bucket: config.spacesBucket,
       Key: key,
-      Body: image.data,
-      ContentType: contentType,
-      ContentLength: image.data.length,
+      Body: processedImage.data,
+      ContentType: processedImage.mimeType,
+      ContentLength: processedImage.data.length,
       ACL: 'public-read'
     }))
   } catch (error) {
@@ -66,10 +73,10 @@ export default defineEventHandler(async event => {
 
   const result = await useDb().insert(attachments).values({
     articleId,
-    originalName: image.filename,
+    originalName: processedImage.originalName,
     storageKey: key,
-    mimeType: contentType,
-    size: image.data.length
+    mimeType: processedImage.mimeType,
+    size: processedImage.data.length
   })
 
   return {
