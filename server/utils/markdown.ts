@@ -22,6 +22,7 @@ export async function renderMarkdown(source: string) {
       ...sanitizeHtml.defaults.allowedAttributes,
       a: ['href', 'name', 'target', 'rel'],
       div: ['class'],
+      ol: ['start'],
       img: ['src', 'alt', 'title', 'loading'],
       iframe: ['src', 'title', 'loading', 'allow', 'allowfullscreen', 'referrerpolicy']
     },

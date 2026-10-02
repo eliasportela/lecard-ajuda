@@ -514,6 +514,7 @@ button, input, textarea, select { font: inherit; }
   .sidebar-mobile-links__socials { display: flex; grid-column: 1 / -1; align-items: center; justify-content: center; gap: 20px; padding-top: 3px; }
   .sidebar-mobile-links .sidebar-mobile-links__social { display: grid; width: 28px; height: 28px; place-items: center; padding: 0; color: var(--brand); background: transparent; }.sidebar-mobile-links .sidebar-mobile-links__social:hover { color: var(--brand-dark); background: transparent; }.sidebar-mobile-links__social svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }.sidebar-mobile-links__social .social-icon-dot,.sidebar-mobile-links__social .social-icon-play { fill: currentColor; stroke: none; }
   .article, .article--home { padding: 38px 22px 72px; }
+  .article-content :is(p, li) { text-align: left; text-justify: auto; }
   .image-lightbox { padding: 16px; }
   .image-lightbox__dialog img { max-width: calc(100vw - 32px); max-height: calc(100dvh - 90px); border-radius: 7px; }
   .image-lightbox__close { position: fixed; top: 14px; right: 14px; width: 44px; height: 44px; }
